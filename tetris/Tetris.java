@@ -11,6 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import proj.MainInterface;
 import proj.style.Animate;
@@ -176,16 +177,48 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         } 
     }
     public void generatePanel() {
+        Font txt_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 15);
+
+        GridPane panelContainer = new GridPane();
+
         Rectangle nextPanel = new Rectangle();
         Rectangle holdPanel = new Rectangle();
         Rectangle scorePanel = new Rectangle();
 
         Text title_score = new Text("Score");
+        Text title_counter = new Text("Counter");
+        Text title_level = new Text("Level");
+        Text title_hold = new Text("Hold");
+        Text title_next = new Text("Next");
+        Text title_speed = new Text("Speed");
 
-        GridPane panelContainer = new GridPane();
+        title_score.setFont(txt_font);
+        title_counter.setFont(txt_font);
+        title_level.setFont(txt_font);
+        title_hold.setFont(txt_font);
+        title_next.setFont(txt_font);
+        title_speed.setFont(txt_font);
+
+        int title_marginLeft = 20;
+
+        title_score.setTranslateX(title_marginLeft);
+        title_counter.setTranslateX(title_marginLeft);
+        title_level.setTranslateX(title_marginLeft);
+        title_hold.setTranslateX(title_marginLeft);
+        title_next.setTranslateX(title_marginLeft);
+        title_speed.setTranslateX(title_marginLeft);
+
+        title_score.setTranslateY(-50);
+        title_counter.setTranslateY(10);
+        title_level.setTranslateY(20);
+        title_hold.setTranslateY(-50);
+        title_next.setTranslateY(-100);
+        title_speed.setTranslateY(30);
+        
 
         int panelWidth = 150;
         int panelArc = 20;  
+
        
         scorePanel.setWidth(panelWidth+100);
         scorePanel.setHeight(150);
@@ -205,18 +238,24 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         holdPanel.setArcHeight(panelArc);
         holdPanel.setFill(GRID_FILL);
 
-
         panelContainer.add(scorePanel, 1, 0);
+        panelContainer.add(title_score, 1, 0);
+        panelContainer.add(title_level, 1, 0);
+        panelContainer.add(title_counter, 1, 0);
+        panelContainer.add(title_speed, 1, 0);
         panelContainer.add(nextPanel, 1, 1);
+        panelContainer.add(title_next, 1, 1);
+        
         panelContainer.add(holdPanel, 0, 0);
-        panelContainer.setVgap(15); 
-        panelContainer.setHgap(330);     
+        panelContainer.add(title_hold, 0, 0);
+        
 
-
-        panelContainer.setPadding(new javafx.geometry.Insets(0, 100, 0, 0)); 
+        panelContainer.setPadding(new javafx.geometry.Insets(0, 70, 0, 0)); 
         panelContainer.setAlignment(Pos.CENTER_RIGHT);
         panelContainer.setMinHeight(DOCUMENT_HEIGHT);
         panelContainer.setMinWidth(DOCUMENT_WIDTH);
+        panelContainer.setVgap(15); 
+        panelContainer.setHgap(360);  
 
         LAYOUT.getChildren().addAll(panelContainer);
     }

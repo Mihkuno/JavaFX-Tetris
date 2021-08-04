@@ -1,6 +1,7 @@
 package proj;
 
 import javafx.application.Application;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import proj.frags.Menu;
 import proj.tetris.Tetris;
@@ -17,7 +18,7 @@ public class Main extends Application implements MainInterface {
 
         WINDOW.setScene(DOCUMENT);
         WINDOW.setTitle("Tetris");
-        WINDOW.show(); 
+        WINDOW.show();
         
     }      
 }
