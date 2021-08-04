@@ -2,9 +2,13 @@ package proj.style;
 
 import java.io.File;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 import proj.MainInterface;
 
 
@@ -48,5 +52,17 @@ public class Audio implements MainInterface {
 
     public static void setSoundVolume(double value) {
         V_SOUND = value;
+    }
+
+    public static void setMusicFadeOut(int seconds) {
+        for (MediaPlayer bgm : MUSIC) {
+            Timeline timeline = new Timeline(
+            new KeyFrame(Duration.seconds(seconds),
+                new KeyValue(bgm.volumeProperty(), 0)));
+            timeline.play();
+            timeline.setOnFinished((e) -> {
+                bgm.stop();
+            });
+        }
     }
 }
