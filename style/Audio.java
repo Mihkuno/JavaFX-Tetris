@@ -12,7 +12,7 @@ public class Audio implements MainInterface {
 
 
     public static double V_SOUND = 1.0;
-    public static double V_MUSIC = 0.2;
+    public static double V_MUSIC = 0.40;
     private AudioClip sound;
     private MediaPlayer music;
 
@@ -35,5 +35,18 @@ public class Audio implements MainInterface {
         music.play();
 
         MUSIC.add(this.music);
+    }
+
+    public static void setMusicVolume(double value) {
+        V_MUSIC = value;
+        // since mediaplayer is a running object, must maniplate each one's attributes through an array
+        // reason why cannot just change value through static
+        for (MediaPlayer bgm : MUSIC) {
+            bgm.setVolume(Audio.V_MUSIC);
+        }
+    }
+
+    public static void setSoundVolume(double value) {
+        V_SOUND = value;
     }
 }

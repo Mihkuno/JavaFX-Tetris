@@ -20,8 +20,8 @@ import proj.style.Animate;
 import proj.style.Audio;
 
 public class Settings implements MainInterface {
-    static Slider vol_music;
-    static Slider vol_sound;
+    static Slider slider_music;
+    static Slider slider_sound;
 
     static Font txt_font;
 
@@ -71,15 +71,15 @@ public class Settings implements MainInterface {
         txt_music.setFont(txt_font);
         txt_music.translateYProperty().set((double)-20);
 
-        vol_music = new Slider();
-        vol_music.setMinWidth(260);
-        vol_music.setValue(Audio.V_MUSIC*100);
-        vol_music.getStylesheets().add("proj/style/slider.css");
+        slider_music = new Slider();
+        slider_music.setMinWidth(260);
+        slider_music.setValue(Audio.V_MUSIC*100);
+        slider_music.getStylesheets().add("proj/style/slider.css");
 
-        vol_sound = new Slider();
-        vol_sound.setMinWidth(260);
-        vol_sound.setValue(Audio.V_SOUND*100);
-        vol_sound.getStylesheets().add("proj/style/slider.css");
+        slider_sound = new Slider();
+        slider_sound.setMinWidth(260);
+        slider_sound.setValue(Audio.V_SOUND*100);
+        slider_sound.getStylesheets().add("proj/style/slider.css");
 
         btn_prev = new Button("Back");
         btn_prev.setFont(txt_font);
@@ -99,10 +99,10 @@ public class Settings implements MainInterface {
         SETTINGS.setAlignment(Pos.CENTER);
         SETTINGS.add(lvl_sound, 0, 0);
         SETTINGS.add(txt_sound, 0, 0);
-        SETTINGS.add(vol_sound, 0, 0);
+        SETTINGS.add(slider_sound, 0, 0);
         SETTINGS.add(lvl_music, 0, 1);
         SETTINGS.add(txt_music, 0, 1); 
-        SETTINGS.add(vol_music, 0, 1); 
+        SETTINGS.add(slider_music, 0, 1); 
         SETTINGS.add(btn_prev, 0, 2);
         SETTINGS.setStyle("-fx-border-width:1px;-fx-border-color:#3d3d3d; -fx-border-radius: 20px;");
         // SETTINGS.setGridLinesVisible(true);
@@ -115,26 +115,23 @@ public class Settings implements MainInterface {
     }
 
     public static void initInput() {
-        vol_music.valueProperty().addListener(new InvalidationListener() {
+        slider_music.valueProperty().addListener(new InvalidationListener() {
             @Override
             public void invalidated(Observable observable) {
-                lvl_music.setText(Integer.toString((int)vol_music.getValue())+"%");
-                Audio.V_MUSIC = (vol_music.getValue()/100);
-                for (MediaPlayer bgm : MUSIC) {
-                    bgm.setVolume(Audio.V_MUSIC);
-                }
+                lvl_music.setText(Integer.toString((int)slider_music.getValue())+"%");
+                Audio.setMusicVolume(slider_music.getValue()/100);
             }
         });
 
-        vol_sound.valueProperty().addListener(new InvalidationListener() {
+        slider_sound.valueProperty().addListener(new InvalidationListener() {
             @Override
             public void invalidated(Observable observable) {
-                lvl_sound.setText(Integer.toString((int)vol_sound.getValue())+"%");
-                Audio.V_SOUND = (vol_sound.getValue()/100);       
+                lvl_sound.setText(Integer.toString((int)slider_sound.getValue())+"%");
+                Audio.setSoundVolume(slider_sound.getValue()/100);     
             }
         });
 
-        vol_sound.setOnMouseReleased((e) -> {
+        slider_sound.setOnMouseReleased((e) -> {
             new Audio().playSound("../sound/m_click.mp3");
         });
 
