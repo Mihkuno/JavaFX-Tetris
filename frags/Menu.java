@@ -111,7 +111,6 @@ public class Menu implements MainInterface {
         
     }
 
-
     private void pressed(String button) {
         if (button == "start") {
 
