@@ -2,14 +2,18 @@ package proj.tetris;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import proj.MainInterface;
+import proj.style.Animate;
 import proj.tetris.block.*;
 
 import java.util.ArrayList;
@@ -38,12 +42,18 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     private AnimationTimer gameLoop;
     
     private boolean showGhost = true;
-    private boolean startGame = true;
+    private boolean startGame = false;
     private boolean delayGravity;
 
-    public Tetris(boolean arg0) {
+    public Tetris() {
+    //    startGame(try);
 
-        startGame = arg0;
+        this.generateGrid(false);
+        this.generatePanel();
+    }
+
+    public void startGame(boolean isready) {
+        startGame = isready;
 
         gameLoop = new AnimationTimer(){
 
@@ -68,7 +78,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         };
 
         if (startGame == true) {
-            this.generateGrid(); 
+            this.generateGrid(true);
             this.generateFocus();
             this.generateGhost();
     
@@ -139,14 +149,11 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             focus.remove(); focus.show();
         }   
     }
-
-
-
     public void delayGravity(boolean value) {
         this.delayGravity = value;
         gameLoop.stop(); gameLoop.start();
     }
-    public void generateGrid() {
+    public void generateGrid(boolean enableAnimation) {
         
         for ( int r = 0; r < ROW; r++){
             for( int c = 0; c < COL; c++){
@@ -162,8 +169,56 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
                 MESH[r][c] = square;
                 LAYOUT.getChildren().add(MESH[r][c]);
+
+                if (enableAnimation == true) {Animate.start_swipe(MESH[r][c], false, 1300);}
+                
             }
         } 
+    }
+    public void generatePanel() {
+        Rectangle nextPanel = new Rectangle();
+        Rectangle holdPanel = new Rectangle();
+        Rectangle scorePanel = new Rectangle();
+
+        Text title_score = new Text("Score");
+
+        GridPane panelContainer = new GridPane();
+
+        int panelWidth = 150;
+        int panelArc = 20;  
+       
+        scorePanel.setWidth(panelWidth+100);
+        scorePanel.setHeight(150);
+        scorePanel.setArcWidth(panelArc);
+        scorePanel.setArcHeight(panelArc);
+        scorePanel.setFill(GRID_FILL);
+
+        nextPanel.setWidth(panelWidth);
+        nextPanel.setHeight(350);
+        nextPanel.setArcWidth(panelArc);
+        nextPanel.setArcHeight(panelArc);
+        nextPanel.setFill(GRID_FILL);
+
+        holdPanel.setWidth(panelWidth);
+        holdPanel.setHeight(125);
+        holdPanel.setArcWidth(panelArc);
+        holdPanel.setArcHeight(panelArc);
+        holdPanel.setFill(GRID_FILL);
+
+
+        panelContainer.add(scorePanel, 1, 0);
+        panelContainer.add(nextPanel, 1, 1);
+        panelContainer.add(holdPanel, 0, 0);
+        panelContainer.setVgap(15); 
+        panelContainer.setHgap(330);     
+
+
+        panelContainer.setPadding(new javafx.geometry.Insets(0, 100, 0, 0)); 
+        panelContainer.setAlignment(Pos.CENTER_RIGHT);
+        panelContainer.setMinHeight(DOCUMENT_HEIGHT);
+        panelContainer.setMinWidth(DOCUMENT_WIDTH);
+
+        LAYOUT.getChildren().addAll(panelContainer);
     }
     public void generateFocus() {
 

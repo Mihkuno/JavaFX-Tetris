@@ -11,7 +11,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 
 public interface MainInterface {
-    int   DOCUMENT_WIDTH = 715;
+    int   DOCUMENT_WIDTH = 900;
     // int   DOCUMENT_HEIGHT = 550;
     int   DOCUMENT_HEIGHT = 600;
     
