@@ -2,6 +2,7 @@ package proj.tetris;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
@@ -45,6 +46,14 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     private boolean showGhost = true;
     private boolean startGame = false;
     private boolean delayGravity;
+
+    static float SCORE = 0;
+    static int COUNTER = 0;
+    static int LEVEL = 0;
+    static int LINES = 0;
+    static int SPEED = 0;
+    static int HOLD = 0;
+    static int NEXT = 0;
 
     public Tetris() {
        startGame(true);
@@ -128,13 +137,19 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             if (!focus.isBottomPoked()) {
                 fx_move.play();
                 focus.moveDown();
+                
+                SCORE += 0.01;
+                this.updateScore();
+
                 delayGravity(true);
             }
         }
         if (key.getCode() == KeyCode.SPACE) {            
             while ( !(focus.isBottomPoked()) ) {
                 focus.moveDown();
+                SCORE += 0.01;
             }
+            this.updateScore();
             initGravity();
         }
 
@@ -176,70 +191,63 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             }
         } 
     }
+
+
+    private Text val_score = new Text(Float.toString(SCORE));
+    private Text val_count = new Text(Integer.toString(COUNTER));
+    private Text val_lines = new Text(Integer.toString(LINES));
+    private Text val_level = new Text(Integer.toString(LEVEL));
+    private Text val_hold = new Text(Integer.toString(HOLD));
+    private Text val_next = new Text(Integer.toString(NEXT));
+    private Text val_speed = new Text(Integer.toString(SPEED));
+
     public void generatePanel() {
-        Font txt_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 14);
+        Font title_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 18);
+        Font val_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 15);
 
         GridPane panelContainer = new GridPane();
+        GridPane blockContainer = new GridPane();
+        GridPane scoreContainer = new GridPane();
+        GridPane titleContainer = new GridPane();
 
         Rectangle nextPanel = new Rectangle();
         Rectangle holdPanel = new Rectangle();
         Rectangle scorePanel = new Rectangle();
 
         Text title_score = new Text("Score");
-        Text title_counter = new Text("Count");
+        Text title_count = new Text("Count");
+        Text title_lines = new Text("Lines");
         Text title_level = new Text("Level");
         Text title_hold = new Text("Hold");
         Text title_next = new Text("Next");
         Text title_speed = new Text("Speed");      
 
-        Text val_score = new Text(Integer.toString(SCORE));
-        Text val_counter = new Text(Integer.toString(COUNTER));
-        Text val_level = new Text(Integer.toString(LEVEL));
-        Text val_hold = new Text(Integer.toString(HOLD));
-        Text val_next = new Text(Integer.toString(NEXT));
-        Text val_speed = new Text(Integer.toString(SPEED));
+        val_score.setFont(val_font);
+        val_count.setFont(val_font);
+        val_lines.setFont(val_font);
+        val_level.setFont(val_font);
+        val_hold.setFont(val_font);
+        val_next.setFont(val_font);
+        val_speed.setFont(val_font);
 
-        title_score.setFont(txt_font);
-        title_counter.setFont(txt_font);
-        title_level.setFont(txt_font);
-        title_hold.setFont(txt_font);
-        title_next.setFont(txt_font);
-        title_speed.setFont(txt_font);
-
-
-        title_score.setFont(txt_font);
-        title_counter.setFont(txt_font);
-        title_level.setFont(txt_font);
-        title_hold.setFont(txt_font);
-        title_next.setFont(txt_font);
-        title_speed.setFont(txt_font);
-
-        int title_marginLeft = 10;
-
-        title_score.setTranslateX(title_marginLeft);
-        title_counter.setTranslateX(title_marginLeft);
-        title_level.setTranslateX(title_marginLeft);
-        title_speed.setTranslateX(title_marginLeft);
+        title_score.setFont(title_font);
+        title_count.setFont(title_font);
+        title_level.setFont(title_font);
+        title_lines.setFont(title_font);
+        title_hold.setFont(title_font);
+        title_next.setFont(title_font);
+        title_speed.setFont(title_font);
 
         title_hold.setTranslateX(15);
         title_next.setTranslateX(15);
-
-        title_score.setTranslateY(-30);
-        title_counter.setTranslateY(10);
-        title_level.setTranslateY(50);
-        title_speed.setTranslateY(90);
-        
         title_hold.setTranslateY(-35);
-        title_next.setTranslateY(-145);
+        title_next.setTranslateY(-145);        
 
-        int panelWidth = 130;
+        int panelWidth = 100;
         int panelArc = 10;  
-
-       
-        scorePanel.setTranslateX(-10);
-        scorePanel.setTranslateY(35);
+        
         scorePanel.setWidth(panelWidth);
-        scorePanel.setHeight(200);
+        scorePanel.setHeight(300);
         scorePanel.setArcWidth(panelArc);
         scorePanel.setArcHeight(panelArc);
         scorePanel.setFill(GRID_FILL);
@@ -256,42 +264,63 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         holdPanel.setArcHeight(panelArc);
         holdPanel.setFill(GRID_FILL);
 
-        panelContainer.add(scorePanel, 0, 0);
-        panelContainer.add(title_score, 0, 0);
-        panelContainer.add(title_level, 0, 0);
-        panelContainer.add(title_counter, 0, 0);
-        panelContainer.add(title_speed, 0, 0);
+        titleContainer.setMinWidth(scoreContainer.getWidth());
+        titleContainer.setAlignment(Pos.CENTER);
+        titleContainer.add(title_score,   0, 0);
+        titleContainer.add(val_score,     0, 1);
+        titleContainer.add(title_count,   0, 2);
+        titleContainer.add(val_count,     0, 3);
+        titleContainer.add(title_lines,   0, 4);
+        titleContainer.add(val_lines,     0 ,5);
+        titleContainer.add(title_level,   0, 6);
+        titleContainer.add(val_level,     0, 7);
+        titleContainer.add(title_speed,   0, 8);
+        titleContainer.add(val_speed,     0, 9);
 
-        
-        panelContainer.add(nextPanel, 1, 1);
-        panelContainer.add(title_next, 1, 1);
-        
-        
-        panelContainer.add(holdPanel, 1, 0);
-        panelContainer.add(title_hold, 1, 0);
-        
+        val_score.setTranslateY(-8);
+        val_count.setTranslateY(-8);
+        val_level.setTranslateY(-8);
+        val_lines.setTranslateY(-8);
+        val_speed.setTranslateY(-8);
 
-        panelContainer.setPadding(new javafx.geometry.Insets(0, 0, 0, 0)); 
-        panelContainer.setAlignment(Pos.TOP_CENTER);
+        titleContainer.setVgap(10);
+        titleContainer.setHgap(10);
+
+        scoreContainer.add(scorePanel,     0, 0);
+        scoreContainer.add(titleContainer, 0, 0);
+
+        blockContainer.add(holdPanel,  0, 0);
+        blockContainer.add(title_hold, 0, 0);
+        blockContainer.add(nextPanel,  0, 1);
+        blockContainer.add(title_next, 0, 1);
+        blockContainer.setVgap(20);
+    
+        panelContainer.setAlignment(Pos.CENTER);
         panelContainer.setMinHeight(DOCUMENT_HEIGHT);
         panelContainer.setMinWidth(DOCUMENT_WIDTH);
-        panelContainer.setVgap(5); 
-        panelContainer.setHgap(310);  
+        panelContainer.setVgap(0); 
+        panelContainer.setHgap(320);  
+        // panelContainer.setGridLinesVisible(true);
+
+        panelContainer.add(scoreContainer, 0, 0);
+        panelContainer.add(blockContainer, 1, 0);
 
         LAYOUT.getChildren().addAll(panelContainer);
     }
-    public void generateFocus() {
 
+    public void updateScore() {
+        val_score.setText(Float.toString(SCORE));
+        val_count.setText(Integer.toString(COUNTER));
+        val_level.setText(Integer.toString(LEVEL));
+        val_lines.setText(Integer.toString(LINES));
+        val_hold.setText(Integer.toString(HOLD));
+        val_next.setText(Integer.toString(NEXT));
+        val_speed.setText(Integer.toString(SPEED));
+    }
+
+    public void generateFocus() {
         Random random = new Random();
         Block[] TETROMINO = {
-            // new I_Block(Color.valueOf("#69D4F8")), 
-            // new J_Block(Color.valueOf("#585DEE")), 
-            // new L_Block(Color.valueOf("#E87924")), 
-            // new O_Block(Color.valueOf("#ECBA30")), 
-            // new S_Block(Color.valueOf("#73CD28")), 
-            // new T_Block(Color.valueOf("#B600AA")), 
-            // new Z_Block(Color.valueOf("#CE0C55"))
-
             new I_Block(Color.valueOf("#3498db")), 
             new J_Block(Color.valueOf("#f39c12")), 
             new L_Block(Color.valueOf("#16a085")), 
@@ -307,7 +336,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         focus = Block.create(TETROMINO[variant]);
         focus.show();
         System.out.println("A new block has been created"); 
-        // blockCounter++;
     }
     public void generateGhost() {
         Block[] TETROMINO = {
@@ -332,6 +360,10 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             ghost.remove();
             focus.collect();
             fx_drop.play();
+
+            COUNTER++;
+            SCORE += 0.5;
+            this.updateScore();
 
             validateLine();
             generateFocus();
@@ -418,12 +450,15 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         if (clearLine == true) {
             
             switch(comboCounter) {
-                case (0) -> fx_clear.play();
-                case (1) -> fx_combo1.play();
-                case (2) -> fx_combo2.play();
-                default -> fx_combo3.play();
+                case (0) -> {fx_clear.play();  SCORE += (5  * (comboCounter + 1)); }
+                case (1) -> {fx_combo1.play(); SCORE += (10 * (comboCounter + 1)); }
+                case (2) -> {fx_combo2.play(); SCORE += (15 * (comboCounter + 1)); }
+                default  -> {fx_combo3.play(); SCORE += (20 * (comboCounter + 1)); }
             }
             comboCounter++;
+
+            LINES += (removedCounter/10);
+            this.updateScore();
 
             System.out.println("removedCounter: "+removedCounter/10);
             System.out.println("removed lastRow: "+removedLastRow);
