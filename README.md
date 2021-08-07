@@ -15,10 +15,12 @@ The game is filled with simple transitions and a minimalist design.
 
 ## Game Mechanics: Level, Scoring, and Speed
 
-- speed starts at 1
-- speed is briefly decreased by plus 0.35s for every s
-- speed is increased by minus 0.20s per level 
-- level is increased every lines of (10 + (5 * level)) 
-- score is increased by plus (0.01 * level) for every s (spacebar is looped)
-- score is increased by plus (0.5 * level) for every new block creation (including hold)
-- score is increased by plus (5 * (combo + 1)) for each drop (combo is added by 1 since it starts at 0)
+- SPEED starts at 1
+- SPEED is decreased by 100ms per LEVEL 
+- SPEED is decreased by 350ms (briefly) for every S control
+
+- LEVEL is increased every line GAIN of GAINUP += (5 + LEVEL)
+
+- SCORE is increased by plus (5 * COMBO) for each drop 
+- SCORE is increased by plus (0.01 * LEVEL) for every S control (SPACEBAR is while looped)
+- SCORE is increased by plus (0.5 * LEVEL) for every new block creation (excluding hold) (UNDER CONSTRUCTION)
