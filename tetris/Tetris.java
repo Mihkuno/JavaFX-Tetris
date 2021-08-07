@@ -95,7 +95,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         };
 
         if (startGame == true) {
-            this.generateGrid(true);
+            this.generateGrid(false);
             this.generateFocus();
             this.generateGhost();
     
@@ -300,12 +300,28 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         scoreContainer.add(scorePanel,     0, 0);
         scoreContainer.add(titleContainer, 0, 0);
 
-        blockContainer.add(holdPanel,  0, 0);
-        blockContainer.add(title_hold, 0, 0);
-        blockContainer.add(nextPanel,  0, 1);
-        blockContainer.add(title_next, 0, 1);
+        
+
+        blockContainer.add(holdPanel,     0, 0);
+        blockContainer.add(title_hold,    0, 0);
+
+        blockContainer.add(nextPanel,     0, 1);
+        blockContainer.add(title_next,    0, 1);
+        blockContainer.add(nextContainer, 0, 1);
         blockContainer.setVgap(20);
         blockContainer.setGridLinesVisible(true);
+
+        Text nxt1 = new Text(next[0]);
+        Text nxt2 = new Text("hello2");
+        Text nxt3 = new Text("hello3");
+        Text nxt4 = new Text("hello4");
+        nextContainer.setAlignment(Pos.CENTER);
+        nextContainer.setVgap(50);
+        nextContainer.add(nxt1, 0, 0);
+        nextContainer.add(nxt2, 0, 1);
+        nextContainer.add(nxt3, 0, 2);
+        nextContainer.add(nxt4, 0, 3);
+        nextContainer.setGridLinesVisible(true);
     
         panelContainer.setAlignment(Pos.CENTER);
         panelContainer.setMinHeight(DOCUMENT_HEIGHT);
@@ -505,7 +521,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 case (2) -> {fx_combo2.play();  COMBO++;}
                 default  -> {fx_combo3.play();  COMBO++;}
             }
-            SCORE += (5 * COMBO);
+            SCORE += ((3 * LEVEL) * COMBO);
             
             LINES += (removedCounter/10);
             GAINLN += (removedCounter/10);
