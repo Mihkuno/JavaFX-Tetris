@@ -1,5 +1,6 @@
 package proj.tetris.block;
 
+import javafx.scene.CacheHint;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.paint.Color;
@@ -158,6 +159,8 @@ public abstract class Block implements MainInterface, TetrisInterface {
         square.setStroke(FOCUS_STROKE_COLOR);
         square.setStrokeWidth(FOCUS_STROKE_WIDTH);
         square.setSmooth(true);
+        square.setCache(true);
+        square.setCacheHint(CacheHint.SPEED);
 
         DropShadow drop = new DropShadow();  
         drop.setBlurType(BlurType.GAUSSIAN);
