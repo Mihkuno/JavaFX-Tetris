@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.media.AudioClip;
+import javafx.scene.CacheHint;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -35,17 +36,18 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     AudioClip fx_combo1 = new AudioClip(this.getClass().getResource("../sound/fx_lne02.mp3").toExternalForm());
     AudioClip fx_combo2 = new AudioClip(this.getClass().getResource("../sound/fx_lne03.mp3").toExternalForm());
     AudioClip fx_combo3 = new AudioClip(this.getClass().getResource("../sound/fx_lne04.mp3").toExternalForm());
-
+    
     private int variant;
     private Block focus, ghost;
     private AnimationTimer gameLoop;
+    private int[] next = new int[4];
     
     private boolean showGhost = true;
     private boolean startGame = false;
     private boolean delayGravity;
 
     static double SPEEDMS = 1000;
-    static float SCORE = 0;
+    static double SCORE = 0;
     static double SPEED = 0;
     static int GAINLN = 0;
     static int GAINUP = 5;
@@ -174,31 +176,9 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         this.delayGravity = value;
         gameLoop.stop(); gameLoop.start();
     }
-    public void generateGrid(boolean enableAnimation) {
-        
-        for ( int r = 0; r < ROW; r++){
-            for( int c = 0; c < COL; c++){
-                Rectangle square = new Rectangle();
-                square.setFill(GRID_FILL);
-                square.setX((c * AREA)  + GRID_XOFFSET );
-                square.setY((r * AREA)  + GRID_YOFFSET);
-                square.setWidth(AREA);
-                square.setHeight(AREA);
-                square.setStroke(GRID_STROKE_COLOR);
-                square.setStrokeWidth(GRID_STROKE_WIDTH);
-                square.setSmooth(true);
+  
 
-                MESH[r][c] = square;
-                LAYOUT.getChildren().add(MESH[r][c]);
-
-                if (enableAnimation == true) {Animate.start_swipe(MESH[r][c], false, 1300);}
-                
-            }
-        } 
-    }
-
-
-    private Text val_score = new Text(Float.toString(SCORE));
+    private Text val_score = new Text(Double.toString(SCORE));
     private Text val_count = new Text(Integer.toString(COUNT));
     private Text val_combo = new Text(Integer.toString(COMBO));
     private Text val_lines = new Text(Integer.toString(LINES));
@@ -208,6 +188,17 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     private Text val_speed = new Text(Double.toString(SPEED));
     private Text val_gain = new Text(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
 
+    public void updateScore() {
+        val_score.setText(Double.toString(Math.floor(SCORE * 100) / 100));
+        val_combo.setText(Integer.toString(COMBO));
+        val_count.setText(Integer.toString(COUNT));
+        val_level.setText(Integer.toString(LEVEL));
+        val_lines.setText(Integer.toString(LINES));
+        val_hold.setText(Integer.toString(HOLD));
+        val_next.setText(Integer.toString(NEXT));
+        val_speed.setText("x"+Double.toString(SPEED));
+        val_gain.setText(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
+    }
     public void generatePanel() {
         Font title_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 17);
         Font val_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 15);
@@ -216,6 +207,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         GridPane blockContainer = new GridPane();
         GridPane scoreContainer = new GridPane();
         GridPane titleContainer = new GridPane();
+        GridPane nextContainer = new GridPane();
 
         Rectangle nextPanel = new Rectangle();
         Rectangle holdPanel = new Rectangle();
@@ -260,7 +252,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         int panelArc = 10;  
         
         scorePanel.setWidth(panelWidth);
-        scorePanel.setHeight(400);
+        scorePanel.setHeight(420);
         scorePanel.setArcWidth(panelArc);
         scorePanel.setArcHeight(panelArc);
         scorePanel.setFill(GRID_FILL);
@@ -302,7 +294,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         val_lines.setTranslateY(-8);
         val_speed.setTranslateY(-8);
 
-        titleContainer.setVgap(10);
+        titleContainer.setVgap(11);
         titleContainer.setHgap(10);
 
         scoreContainer.add(scorePanel,     0, 0);
@@ -313,6 +305,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         blockContainer.add(nextPanel,  0, 1);
         blockContainer.add(title_next, 0, 1);
         blockContainer.setVgap(20);
+        blockContainer.setGridLinesVisible(true);
     
         panelContainer.setAlignment(Pos.CENTER);
         panelContainer.setMinHeight(DOCUMENT_HEIGHT);
@@ -326,37 +319,49 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
         LAYOUT.getChildren().addAll(panelContainer);
     }
-
-    public void updateScore() {
-        val_score.setText(Float.toString(SCORE));
-        val_combo.setText(Integer.toString(COMBO));
-        val_count.setText(Integer.toString(COUNT));
-        val_level.setText(Integer.toString(LEVEL));
-        val_lines.setText(Integer.toString(LINES));
-        val_hold.setText(Integer.toString(HOLD));
-        val_next.setText(Integer.toString(NEXT));
-        val_speed.setText("x"+Double.toString(SPEED));
-        val_gain.setText(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
-    }
-
     public void generateFocus() {
         Random random = new Random();
-        Block[] TETROMINO = {
-            new I_Block(Color.valueOf("#3498db")), 
-            new J_Block(Color.valueOf("#f39c12")), 
-            new L_Block(Color.valueOf("#16a085")), 
-            new O_Block(Color.valueOf("#f1c40f")), 
-            new S_Block(Color.valueOf("#2ecc71")), 
-            new T_Block(Color.valueOf("#9b59b6")), 
-            new Z_Block(Color.valueOf("#e74c3c"))
-        };
         
-        
-        variant = random.nextInt(TETROMINO.length);
-        // variant = 3;
+        Block[] TETROMINO = new Block[7];
+
+        if (COUNT == 0) {
+            for (int i = 0; i < next.length; i++) {
+                
+                TETROMINO[0] = new I_Block(Color.valueOf("#3498db"));
+                TETROMINO[1] = new J_Block(Color.valueOf("#f39c12")); 
+                TETROMINO[2] = new L_Block(Color.valueOf("#16a085")); 
+                TETROMINO[3] = new O_Block(Color.valueOf("#f1c40f")); 
+                TETROMINO[4] = new S_Block(Color.valueOf("#2ecc71")); 
+                TETROMINO[5] = new T_Block(Color.valueOf("#9b59b6")); 
+                TETROMINO[6] = new Z_Block(Color.valueOf("#e74c3c"));         
+                
+                next[i] = random.nextInt(TETROMINO.length);
+            }
+        } 
+
+        else {
+            for (int i = 0; i < next.length-1; i++) {
+                next[i] = next[i+1];
+            }
+
+            TETROMINO[0] = new I_Block(Color.valueOf("#3498db"));
+            TETROMINO[1] = new J_Block(Color.valueOf("#f39c12")); 
+            TETROMINO[2] = new L_Block(Color.valueOf("#16a085")); 
+            TETROMINO[3] = new O_Block(Color.valueOf("#f1c40f")); 
+            TETROMINO[4] = new S_Block(Color.valueOf("#2ecc71")); 
+            TETROMINO[5] = new T_Block(Color.valueOf("#9b59b6")); 
+            TETROMINO[6] = new Z_Block(Color.valueOf("#e74c3c"));         
+
+            next[next.length-1] = random.nextInt(TETROMINO.length);
+        }
+
+
+        variant = next[0];
         focus = Block.create(TETROMINO[variant]);
         focus.show();
+
         System.out.println("A new block has been created"); 
+        System.out.printf("%d | %d | %d | %d",next[0],next[1],next[2],next[3]);
     }
     public void generateGhost() {
         Block[] TETROMINO = {
@@ -375,6 +380,30 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             do { ghost.moveDown();
             } while ( !ghost.isBottomPoked() );
         }
+    }
+    public void generateGrid(boolean enableAnimation) {
+        
+        for ( int r = 0; r < ROW; r++){
+            for( int c = 0; c < COL; c++){
+                Rectangle square = new Rectangle();
+                square.setFill(GRID_FILL);
+                square.setX((c * AREA)  + GRID_XOFFSET );
+                square.setY((r * AREA)  + GRID_YOFFSET);
+                square.setWidth(AREA);
+                square.setHeight(AREA);
+                square.setStroke(GRID_STROKE_COLOR);
+                square.setStrokeWidth(GRID_STROKE_WIDTH);
+                square.setSmooth(true);
+                square.setCache(true);
+                square.setCacheHint(CacheHint.SPEED);
+
+                MESH[r][c] = square;
+                LAYOUT.getChildren().add(MESH[r][c]);
+
+                if (enableAnimation == true) {Animate.start_swipe(MESH[r][c], false, 800);}
+                
+            }
+        } 
     }
     public void initGravity() {
         if (focus.isBottomPoked()) {
@@ -487,9 +516,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 GAINUP += (5 + LEVEL);
                 SPEEDMS -= 100;
             }
-
-            // this.updateScore();
-
 
             System.out.println("removedCounter: "+removedCounter/10);
             System.out.println("removed lastRow: "+removedLastRow);
