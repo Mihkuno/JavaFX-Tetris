@@ -204,6 +204,8 @@ public class Menu implements MainInterface {
             "-fx-min-height: 60px; "+
             "-fx-background-color: #2ecc71"
         );
+        btn_start.setCache(true);
+        btn_start.setCacheHint(CacheHint.SPEED);
 
         // settings button
         img_setting = new Image("proj/image/ic_setting.png");
@@ -211,6 +213,9 @@ public class Menu implements MainInterface {
         btn_setting.setCursor(Cursor.CLOSED_HAND);
         btn_setting.setGraphic(new ImageView(img_setting) ); 
         btn_setting.setStyle("-fx-background-color: none");
+        btn_setting.setCache(true);
+        btn_setting.setCacheHint(CacheHint.SPEED);
+
 
         // info button
         img_info = new Image("proj/image/ic_info.png");
@@ -218,6 +223,8 @@ public class Menu implements MainInterface {
         btn_info.setCursor(Cursor.CLOSED_HAND);
         btn_info.setGraphic(new ImageView(img_info) ); 
         btn_info.setStyle("-fx-background-color: none");
+        btn_info.setCache(true);
+        btn_info.setCacheHint(CacheHint.SPEED);
 
         // background music
         new Audio().playMusic("src/proj/sound/bg_wires.mp3");
