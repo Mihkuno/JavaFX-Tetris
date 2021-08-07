@@ -36,9 +36,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     AudioClip fx_combo2 = new AudioClip(this.getClass().getResource("../sound/fx_lne03.mp3").toExternalForm());
     AudioClip fx_combo3 = new AudioClip(this.getClass().getResource("../sound/fx_lne04.mp3").toExternalForm());
 
-    // private static int seconds, blockCounter;
-    private static int comboCounter;
-
     private int variant;
     private Block focus, ghost;
     private AnimationTimer gameLoop;
@@ -47,11 +44,15 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     private boolean startGame = false;
     private boolean delayGravity;
 
+    static double SPEEDMS = 1000;
     static float SCORE = 0;
-    static int COUNTER = 0;
+    static double SPEED = 0;
+    static int GAINLN = 0;
+    static int GAINUP = 5;
+    static int COUNT = 0;
+    static int COMBO = 0;
     static int LEVEL = 0;
     static int LINES = 0;
-    static int SPEED = 0;
     static int HOLD = 0;
     static int NEXT = 0;
 
@@ -72,8 +73,12 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             @Override
             public void handle(long now) {
 
-                long sleepMs = delayGravity ? 1350 : 1000;
-                long sleepNs = sleepMs * 1_000_000;
+
+                double sleepMs = delayGravity ? (SPEEDMS + 350) : SPEEDMS;
+                double sleepNs = sleepMs * 1_000_000;
+
+                SPEED = SPEEDMS/1000;
+                updateScore();
                                 
                 // some delay
                 if ((now - prevTime) < sleepNs) {
@@ -194,15 +199,17 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
 
     private Text val_score = new Text(Float.toString(SCORE));
-    private Text val_count = new Text(Integer.toString(COUNTER));
+    private Text val_count = new Text(Integer.toString(COUNT));
+    private Text val_combo = new Text(Integer.toString(COMBO));
     private Text val_lines = new Text(Integer.toString(LINES));
     private Text val_level = new Text(Integer.toString(LEVEL));
     private Text val_hold = new Text(Integer.toString(HOLD));
     private Text val_next = new Text(Integer.toString(NEXT));
-    private Text val_speed = new Text(Integer.toString(SPEED));
+    private Text val_speed = new Text(Double.toString(SPEED));
+    private Text val_gain = new Text(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
 
     public void generatePanel() {
-        Font title_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 18);
+        Font title_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 17);
         Font val_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 15);
 
         GridPane panelContainer = new GridPane();
@@ -215,24 +222,30 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         Rectangle scorePanel = new Rectangle();
 
         Text title_score = new Text("Score");
+        Text title_combo = new Text("Combo");
         Text title_count = new Text("Count");
         Text title_lines = new Text("Lines");
         Text title_level = new Text("Level");
+        Text title_gain = new Text("Gain");
         Text title_hold = new Text("Hold");
         Text title_next = new Text("Next");
         Text title_speed = new Text("Speed");      
 
         val_score.setFont(val_font);
+        val_combo.setFont(val_font);
         val_count.setFont(val_font);
         val_lines.setFont(val_font);
         val_level.setFont(val_font);
+        val_gain.setFont(val_font);
         val_hold.setFont(val_font);
         val_next.setFont(val_font);
         val_speed.setFont(val_font);
 
         title_score.setFont(title_font);
+        title_combo.setFont(title_font);
         title_count.setFont(title_font);
         title_level.setFont(title_font);
+        title_gain.setFont(title_font);
         title_lines.setFont(title_font);
         title_hold.setFont(title_font);
         title_next.setFont(title_font);
@@ -247,7 +260,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         int panelArc = 10;  
         
         scorePanel.setWidth(panelWidth);
-        scorePanel.setHeight(300);
+        scorePanel.setHeight(400);
         scorePanel.setArcWidth(panelArc);
         scorePanel.setArcHeight(panelArc);
         scorePanel.setFill(GRID_FILL);
@@ -268,18 +281,24 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         titleContainer.setAlignment(Pos.CENTER);
         titleContainer.add(title_score,   0, 0);
         titleContainer.add(val_score,     0, 1);
-        titleContainer.add(title_count,   0, 2);
-        titleContainer.add(val_count,     0, 3);
-        titleContainer.add(title_lines,   0, 4);
-        titleContainer.add(val_lines,     0 ,5);
-        titleContainer.add(title_level,   0, 6);
-        titleContainer.add(val_level,     0, 7);
-        titleContainer.add(title_speed,   0, 8);
-        titleContainer.add(val_speed,     0, 9);
+        titleContainer.add(title_combo,   0, 2);
+        titleContainer.add(val_combo,     0, 3);
+        titleContainer.add(title_count,   0, 4);
+        titleContainer.add(val_count,     0, 5);
+        titleContainer.add(title_lines,   0, 6);
+        titleContainer.add(val_lines,     0 ,7);
+        titleContainer.add(title_level,   0, 8);
+        titleContainer.add(val_level,     0, 9);
+        titleContainer.add(title_gain,    0, 10);
+        titleContainer.add(val_gain,      0, 11);
+        titleContainer.add(title_speed,   0, 12);
+        titleContainer.add(val_speed,     0, 13);
 
         val_score.setTranslateY(-8);
+        val_combo.setTranslateY(-8);
         val_count.setTranslateY(-8);
         val_level.setTranslateY(-8);
+        val_gain.setTranslateY(-8);
         val_lines.setTranslateY(-8);
         val_speed.setTranslateY(-8);
 
@@ -299,7 +318,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         panelContainer.setMinHeight(DOCUMENT_HEIGHT);
         panelContainer.setMinWidth(DOCUMENT_WIDTH);
         panelContainer.setVgap(0); 
-        panelContainer.setHgap(320);  
+        panelContainer.setHgap(330);  
         // panelContainer.setGridLinesVisible(true);
 
         panelContainer.add(scoreContainer, 0, 0);
@@ -310,12 +329,14 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
     public void updateScore() {
         val_score.setText(Float.toString(SCORE));
-        val_count.setText(Integer.toString(COUNTER));
+        val_combo.setText(Integer.toString(COMBO));
+        val_count.setText(Integer.toString(COUNT));
         val_level.setText(Integer.toString(LEVEL));
         val_lines.setText(Integer.toString(LINES));
         val_hold.setText(Integer.toString(HOLD));
         val_next.setText(Integer.toString(NEXT));
-        val_speed.setText(Integer.toString(SPEED));
+        val_speed.setText("x"+Double.toString(SPEED));
+        val_gain.setText(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
     }
 
     public void generateFocus() {
@@ -361,7 +382,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             focus.collect();
             fx_drop.play();
 
-            COUNTER++;
+            COUNT++;
             SCORE += 0.5;
             this.updateScore();
 
@@ -448,17 +469,27 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         */
 
         if (clearLine == true) {
-            
-            switch(comboCounter) {
-                case (0) -> {fx_clear.play();  SCORE += (5  * (comboCounter + 1)); }
-                case (1) -> {fx_combo1.play(); SCORE += (10 * (comboCounter + 1)); }
-                case (2) -> {fx_combo2.play(); SCORE += (15 * (comboCounter + 1)); }
-                default  -> {fx_combo3.play(); SCORE += (20 * (comboCounter + 1)); }
-            }
-            comboCounter++;
 
+            switch(COMBO) {
+                case (0) -> {fx_clear.play();   COMBO++;}
+                case (1) -> {fx_combo1.play();  COMBO++;}
+                case (2) -> {fx_combo2.play();  COMBO++;}
+                default  -> {fx_combo3.play();  COMBO++;}
+            }
+            SCORE += (5 * COMBO);
+            
             LINES += (removedCounter/10);
-            this.updateScore();
+            GAINLN += (removedCounter/10);
+
+            if (GAINLN >= GAINUP) {
+                LEVEL++;
+                GAINLN = 0;
+                GAINUP += (5 + LEVEL);
+                SPEEDMS -= 100;
+            }
+
+            // this.updateScore();
+
 
             System.out.println("removedCounter: "+removedCounter/10);
             System.out.println("removed lastRow: "+removedLastRow);
@@ -519,7 +550,8 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 // proceed to the next row filter group
             }
         } 
-        else {comboCounter = 0;}
+        else {COMBO = 0; this.updateScore();}
+        
     }
 
     @Deprecated

@@ -11,7 +11,7 @@ public interface TetrisInterface {
     int   COL = 10;
     int   AREA = 27;
 
-    int   GRID_XOFFSET = 215;
+    int   GRID_XOFFSET = 240;
     int   GRID_YOFFSET = 30;
     int   GRID_STROKE_WIDTH = 1;
     int   FOCUS_STROKE_WIDTH = 1;
