@@ -1,8 +1,12 @@
 package proj.tetris.block;
 
+import java.util.ArrayList;
+
 import javafx.scene.CacheHint;
+import javafx.scene.Node;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import proj.MainInterface;
@@ -21,7 +25,11 @@ public abstract class Block implements MainInterface, TetrisInterface {
     private int[][] pickedVariant = block()[this.variantCounter];    
 
     private Rectangle[][] SQUARE = new Rectangle[ROW][COL];  
-    
+
+
+    private static Block[] TETRONIMO = new Block[7];
+
+    public static final int length = TETRONIMO.length;
     
     protected Color color; 
 
@@ -37,15 +45,14 @@ public abstract class Block implements MainInterface, TetrisInterface {
     }
 
     public static Block select(int index, boolean color) {
-        Block[] TETRONIMO = {
-            new I_Block(Color.valueOf("#3498db")),
-            new J_Block(Color.valueOf("#f39c12")), 
-            new L_Block(Color.valueOf("#16a085")), 
-            new O_Block(Color.valueOf("#f1c40f")), 
-            new S_Block(Color.valueOf("#2ecc71")), 
-            new T_Block(Color.valueOf("#9b59b6")), 
-            new Z_Block(Color.valueOf("#e74c3c")) 
-        };
+
+        TETRONIMO[0] = new I_Block(Color.valueOf("#3498db"));
+        TETRONIMO[1] = new J_Block(Color.valueOf("#f39c12")); 
+        TETRONIMO[2] = new L_Block(Color.valueOf("#16a085")); 
+        TETRONIMO[3] = new O_Block(Color.valueOf("#f1c40f")); 
+        TETRONIMO[4] = new S_Block(Color.valueOf("#2ecc71"));
+        TETRONIMO[5] = new T_Block(Color.valueOf("#9b59b6")); 
+        TETRONIMO[6] = new Z_Block(Color.valueOf("#e74c3c")); 
 
         if (color == false) {
             TETRONIMO[index].setColor(GHOST_FILL);
@@ -56,6 +63,10 @@ public abstract class Block implements MainInterface, TetrisInterface {
 
     public void setColor(Color color) {
         this.color = color;
+    }
+
+    public Color getColor() {
+        return this.color;
     }
 
     public void moveRight() {
@@ -225,20 +236,20 @@ public abstract class Block implements MainInterface, TetrisInterface {
         }
     }
 
-    // absolute position, used only for hold and next panels
-    public void drawOpen(int x, int y) {
+    // absolute position, used only for hold and next panels, must instantiate its own parent
+    public ArrayList<Rectangle> drawOpen() {
+        ArrayList<Rectangle> block = new ArrayList<Rectangle>();
         for ( int r = 0; r < this.pickedVariant.length; r++){
             for ( int c = 0; c < this.pickedVariant.length; c++){
-
                 if (this.pickedVariant[r][c] == 1) { 
-                    column = x;
-                    row    = y;
-                    
-                    SQUARE[r][c] = createSquare(column, row);
-                    LAYOUT.getChildren().add(SQUARE[r][c]);
+                    /*optional*/
+                    column = ((c) * AREA);
+                    row    = ((r) * AREA);
+                    block.add(createSquare(column, row));
                 }
             }
         }
+        return block;
     }
 
     public void undraw() {

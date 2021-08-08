@@ -5,7 +5,9 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.CacheHint;
 import javafx.scene.image.Image;
@@ -29,6 +31,7 @@ import java.util.Set;
 
 public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInterface{
 
+    private static final String StackPane = null;
     AudioClip fx_drop = new AudioClip(this.getClass().getResource("../sound/fx_lnd01.mp3").toExternalForm());
     AudioClip fx_move = new AudioClip(this.getClass().getResource("../sound/fx_move.mp3").toExternalForm());
     AudioClip fx_rotate = new AudioClip(this.getClass().getResource("../sound/fx_rotate.mp3").toExternalForm());
@@ -40,8 +43,8 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     private int variant;
     private Block focus, ghost;
     private AnimationTimer gameLoop;
-
-    private int[] next = new int[4]; 
+    private int[] nextIndex = new int[4]; 
+    private Block[] nextBlock = new Block[nextIndex.length]; 
 
     private boolean showGhost = true;
     private boolean startGame = false;
@@ -97,6 +100,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             this.generateFocus();
             this.generateGhost();
             this.generatePanel();
+            
     
             DOCUMENT.setOnKeyPressed(this);
             gameLoop.start();  
@@ -198,29 +202,39 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         val_speed.setText("x"+Double.toString(SPEED));
         val_gain.setText(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
     }
+    
+    
+    
+    GridPane panelContainer, blockContainer, scoreContainer, titleContainer, nextContainer;
+    Rectangle nextPanel, holdPanel, scorePanel;
+    Text title_score, title_combo, title_count, title_lines, title_level, title_gain, title_hold, title_next, title_speed;
+
+    int panelWidth = 100;
+    int panelArc = 10;  
+    
     public void generatePanel() {
         Font title_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 17);
         Font val_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 15);
 
-        GridPane panelContainer = new GridPane();
-        GridPane blockContainer = new GridPane();
-        GridPane scoreContainer = new GridPane();
-        GridPane titleContainer = new GridPane();
-        GridPane nextContainer = new GridPane();
+        panelContainer = new GridPane();
+        blockContainer = new GridPane();
+        scoreContainer = new GridPane();
+        titleContainer = new GridPane();
+        nextContainer = new GridPane();
 
-        Rectangle nextPanel = new Rectangle();
-        Rectangle holdPanel = new Rectangle();
-        Rectangle scorePanel = new Rectangle();
+        nextPanel = new Rectangle();
+        holdPanel = new Rectangle();
+        scorePanel = new Rectangle();
 
-        Text title_score = new Text("Score");
-        Text title_combo = new Text("Combo");
-        Text title_count = new Text("Count");
-        Text title_lines = new Text("Lines");
-        Text title_level = new Text("Level");
-        Text title_gain = new Text("Gain");
-        Text title_hold = new Text("Hold");
-        Text title_next = new Text("Next");
-        Text title_speed = new Text("Speed");      
+        title_score = new Text("Score");
+        title_combo = new Text("Combo");
+        title_count = new Text("Count");
+        title_lines = new Text("Lines");
+        title_level = new Text("Level");
+        title_gain = new Text("Gain");
+        title_hold = new Text("Hold");
+        title_next = new Text("Next");
+        title_speed = new Text("Speed");      
 
         val_score.setFont(val_font);
         val_combo.setFont(val_font);
@@ -246,9 +260,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         title_next.setTranslateX(15);
         title_hold.setTranslateY(-35);
         title_next.setTranslateY(-145);        
-
-        int panelWidth = 100;
-        int panelArc = 10;  
         
         scorePanel.setWidth(panelWidth);
         scorePanel.setHeight(420);
@@ -309,10 +320,17 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
         nextContainer.setAlignment(Pos.CENTER);
         nextContainer.setVgap(50);
-        // nextContainer.add(Block.select(0).drawOpen(50), 0, 0);
-        // nextContainer.add(nextBlock[1], 0, 1);
-        // nextContainer.add(nextBlock[2], 0, 2);
-        // nextContainer.add(nextBlock[3], 0, 3);
+
+        /* block generator here */
+        Pane[] next = new Pane[nextIndex.length];
+        if (nextIndex != null) {
+            for (int i = 0; i < nextIndex.length; i++) {
+                next[i] = new Pane();
+                next[i].getChildren().addAll(nextBlock[i].drawOpen());
+
+                nextContainer.add(next[i], 0, i);
+            }
+        }
         nextContainer.setGridLinesVisible(true);
     
         panelContainer.setAlignment(Pos.CENTER);
@@ -327,54 +345,42 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
         LAYOUT.getChildren().addAll(panelContainer);
     }
-    public void generateFocus() {
-        Random random = new Random();
-
-        
+    
+    public void generateBlock() {
+        Random random = new Random();        
 
         if (COUNT == 0) {
-            for (int i = 0; i < next.length; i++) {
-                
-                next[i] = random.nextInt(7);
+            for (int i = 0; i < nextIndex.length; i++) {
+                nextIndex[i] = random.nextInt(Block.length);
             }
         } 
 
         else {
-            for (int i = 0; i < next.length-1; i++) {
-                next[i] = next[i+1];
+            for (int i = 0; i < nextIndex.length-1; i++) {
+                nextIndex[i] = nextIndex[i+1];
             }     
 
-            next[next.length-1] = random.nextInt(7);
+            nextIndex[nextIndex.length-1] = random.nextInt(Block.length);
         }
 
-        // for (int i = 0; i < next.length; i++) {
-        //     nextBlock[i] = Block.select(next[i]);
-        // }
+        for (int i = 0; i < nextIndex.length; i++) {
+            nextBlock[i] = Block.select(nextIndex[i], true);
+        }
+    }
+    public void generateFocus() {
+        generateBlock();
 
-
-        // Block[] TETRONIMO = {
-        //     new I_Block(Color.valueOf("#3498db")),
-        //     new J_Block(Color.valueOf("#f39c12")), 
-        //     new L_Block(Color.valueOf("#16a085")), 
-        //     new O_Block(Color.valueOf("#f1c40f")), 
-        //     new S_Block(Color.valueOf("#2ecc71")), 
-        //     new T_Block(Color.valueOf("#9b59b6")), 
-        //     new Z_Block(Color.valueOf("#e74c3c")) 
-        // };
-        
-        variant = next[0];
+        variant = nextIndex[0];
         focus = Block.select(variant, true);
         focus.drawActive();
-        // focus = Block.create(TETRONIMO[variant]);
-        // focus.show();
 
         System.out.println("A new block has been created"); 
-        // System.out.printf("%d | %d | %d | %d",next[0],next[1],next[2],next[3]);
+        System.out.printf("%d | %d | %d | %d",nextIndex[0],nextIndex[1],nextIndex[2],nextIndex[3]);
     }
     public void generateGhost() {
 
     
-        ghost = Block.select(variant, true);
+        ghost = Block.select(variant, false);
         if (showGhost) {
             ghost.drawActive();
 
@@ -495,7 +501,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             then pull down the blocks of the first occurence of a filled last-row (above the removed lastrow) until they have equal values
             if the blocks has equal value as the removed lastrow, then raise the removed lastrow on row above it
             which acts as a recursive pull while maintaining row holes
-            loop, then proceed to filter the next row until theres no more rows above removed lastrow
+            loop, then proceed to filter the nextIndex row until theres no more rows above removed lastrow
         */
 
         if (clearLine == true) {
@@ -574,7 +580,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                     removedLastRow = removedLastRow - AREA;
                     decreaseLastRow = false; 
                 }
-                // proceed to the next row filter group
+                // proceed to the nextIndex row filter group
             }
         } 
         else {COMBO = 0; this.updateScore();}
