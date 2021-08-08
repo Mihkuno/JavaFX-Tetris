@@ -31,34 +31,50 @@ public abstract class Block implements MainInterface, TetrisInterface {
 
     protected abstract int[][][] block();
 
+    @Deprecated
     public static Block create(Block block) {
         return block;
     }
 
-    public void show() {
-        drawActive(counterX, counterY);
+    public static Block select(int index, boolean color) {
+        Block[] TETRONIMO = {
+            new I_Block(Color.valueOf("#3498db")),
+            new J_Block(Color.valueOf("#f39c12")), 
+            new L_Block(Color.valueOf("#16a085")), 
+            new O_Block(Color.valueOf("#f1c40f")), 
+            new S_Block(Color.valueOf("#2ecc71")), 
+            new T_Block(Color.valueOf("#9b59b6")), 
+            new Z_Block(Color.valueOf("#e74c3c")) 
+        };
+
+        if (color == false) {
+            TETRONIMO[index].setColor(GHOST_FILL);
+        }
+
+        return TETRONIMO[index];
     }
-    public void remove() {
-        undrawActive();
+
+    public void setColor(Color color) {
+        this.color = color;
     }
 
     public void moveRight() {
-        this.undrawActive();
+        this.undraw();
         counterX += 1;
         this.drawActive(counterX, counterY);
     }
     public void moveLeft()  {
-        this.undrawActive();
+        this.undraw();
         counterX -= 1;
         this.drawActive(counterX, counterY); 
     }
     public void moveDown()  {
-        this.undrawActive();
+        this.undraw();
         counterY += 1;
         this.drawActive(counterX, counterY); 
     }
     public void moveUp()    {
-        this.undrawActive(); 
+        this.undraw(); 
         this.drawActive(counterX, --counterY); 
     }
     
@@ -67,14 +83,14 @@ public abstract class Block implements MainInterface, TetrisInterface {
         int previousVariationCount;
         previousVariationCount = this.variantCounter;
 
-        this.undrawActive();
+        this.undraw();
         this.variantCounter = (this.variantCounter + 1) % block().length;
         this.pickedVariant = this.block()[this.variantCounter];
         this.drawActive(counterX, counterY);
 
         if (this.isNextBlockPoked() && focusRestriction == true) {
             System.out.println("block rotation is cancelled");
-            this.undrawActive();
+            this.undraw();
             this.variantCounter = previousVariationCount;
             this.pickedVariant = this.block()[this.variantCounter];
             this.drawActive(counterX, counterY);
@@ -83,11 +99,11 @@ public abstract class Block implements MainInterface, TetrisInterface {
         else if (this.isNextGridRightPoked()) {
             while(this.isNextGridRightPoked()) {
                 System.out.println("right rotation kick");
-                this.undrawActive();
+                this.undraw();
                 this.drawActive(--counterX, counterY);
                 if (this.isNextBlockPoked() && focusRestriction == true) {
                     System.out.println("block rotation is cancelled");
-                    this.undrawActive();
+                    this.undraw();
                     this.variantCounter = previousVariationCount;
                     this.pickedVariant = this.block()[this.variantCounter];
                     this.drawActive(counterX, counterY);
@@ -98,11 +114,11 @@ public abstract class Block implements MainInterface, TetrisInterface {
         else if (this.isNextGridLeftPoked()) {
             while(this.isNextGridLeftPoked()) {
                 System.out.println("left rotation kick");
-                this.undrawActive();
+                this.undraw();
                 this.drawActive(++counterX, counterY);
                 if (this.isNextBlockPoked() && focusRestriction == true) {
                     System.out.println("block rotation is cancelled");
-                    this.undrawActive();
+                    this.undraw();
                     this.variantCounter = previousVariationCount;
                     this.pickedVariant = this.block()[this.variantCounter];
                     this.drawActive(counterX, counterY);
@@ -116,7 +132,7 @@ public abstract class Block implements MainInterface, TetrisInterface {
 
             if (rotateLoopCounter >= 2 && focusRestriction == true) {
                 System.out.println("block rotation is cancelled");
-                this.undrawActive();
+                this.undraw();
                 this.variantCounter = previousVariationCount;
                 this.pickedVariant = this.block()[this.variantCounter];
                 this.drawActive(counterX, counterY);
@@ -125,7 +141,7 @@ public abstract class Block implements MainInterface, TetrisInterface {
             else {
                 while (this.isNextGridBottomPoked()) {
                     if (focusRestriction == true) {System.out.println("bottom rotation kick");}
-                    this.undrawActive();
+                    this.undraw();
                     this.drawActive(counterX, --counterY);
                 }
             }     
@@ -174,7 +190,11 @@ public abstract class Block implements MainInterface, TetrisInterface {
         return square;
     }
     
-    private void drawActive(int counterX, int counterY) {
+
+
+
+    // uses the default and current values of the class instance (default starts in the middle|top <- 0|0 )
+    public void drawActive() {
         for ( int r = 0; r < this.pickedVariant.length; r++){
             for ( int c = 0; c < this.pickedVariant.length; c++){
 
@@ -188,7 +208,40 @@ public abstract class Block implements MainInterface, TetrisInterface {
             }
         }
     }
-    private void undrawActive() {
+    // Overload.. used only in the first creation... arguments determine the location of where it spawns on the grid
+    public void drawActive(int counterX, int counterY) {
+        this.counterX = counterX; this.counterY = counterY;
+        for ( int r = 0; r < this.pickedVariant.length; r++){
+            for ( int c = 0; c < this.pickedVariant.length; c++){
+
+                if (this.pickedVariant[r][c] == 1) { 
+                    column = (focusStartColumn + (counterX + c) * AREA) + GRID_XOFFSET;
+                    row    = (focusStartRow + (counterY + r) * AREA) + GRID_YOFFSET;
+                    
+                    SQUARE[r][c] = createSquare(column, row);
+                    LAYOUT.getChildren().add(SQUARE[r][c]);
+                }
+            }
+        }
+    }
+
+    // absolute position, used only for hold and next panels
+    public void drawOpen(int x, int y) {
+        for ( int r = 0; r < this.pickedVariant.length; r++){
+            for ( int c = 0; c < this.pickedVariant.length; c++){
+
+                if (this.pickedVariant[r][c] == 1) { 
+                    column = x;
+                    row    = y;
+                    
+                    SQUARE[r][c] = createSquare(column, row);
+                    LAYOUT.getChildren().add(SQUARE[r][c]);
+                }
+            }
+        }
+    }
+
+    public void undraw() {
         for ( int r = 0; r < this.pickedVariant.length; r++){
             for ( int c = 0; c < this.pickedVariant.length; c++){
                 if (this.pickedVariant[r][c] == 1) { 
@@ -197,6 +250,10 @@ public abstract class Block implements MainInterface, TetrisInterface {
             }
         }
     }
+
+
+
+
     public boolean isTopPoking(Block block) {
         for (int i = 0; i < 4; i++) {
             if (     block.getActiveRow(i) >= this.getActiveRow(i)   ) {

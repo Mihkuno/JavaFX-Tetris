@@ -40,8 +40,9 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     private int variant;
     private Block focus, ghost;
     private AnimationTimer gameLoop;
-    private int[] next = new int[4];
-    
+
+    private int[] next = new int[4]; 
+
     private boolean showGhost = true;
     private boolean startGame = false;
     private boolean delayGravity;
@@ -60,9 +61,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
     public Tetris() {
        startGame(true);
-
-        // this.generateGrid(false);
-        this.generatePanel();
     }
 
     public void startGame(boolean isready) {
@@ -98,6 +96,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             this.generateGrid(false);
             this.generateFocus();
             this.generateGhost();
+            this.generatePanel();
     
             DOCUMENT.setOnKeyPressed(this);
             gameLoop.start();  
@@ -169,7 +168,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             while ( !(ghost.isBottomPoked()) ) {
                 ghost.moveDown();
             }
-            focus.remove(); focus.show();
+            focus.undraw(); focus.drawActive();
         }   
     }
     public void delayGravity(boolean value) {
@@ -300,27 +299,20 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         scoreContainer.add(scorePanel,     0, 0);
         scoreContainer.add(titleContainer, 0, 0);
 
-        
-
         blockContainer.add(holdPanel,     0, 0);
         blockContainer.add(title_hold,    0, 0);
-
         blockContainer.add(nextPanel,     0, 1);
         blockContainer.add(title_next,    0, 1);
         blockContainer.add(nextContainer, 0, 1);
         blockContainer.setVgap(20);
         blockContainer.setGridLinesVisible(true);
 
-        Text nxt1 = new Text(next[0]);
-        Text nxt2 = new Text("hello2");
-        Text nxt3 = new Text("hello3");
-        Text nxt4 = new Text("hello4");
         nextContainer.setAlignment(Pos.CENTER);
         nextContainer.setVgap(50);
-        nextContainer.add(nxt1, 0, 0);
-        nextContainer.add(nxt2, 0, 1);
-        nextContainer.add(nxt3, 0, 2);
-        nextContainer.add(nxt4, 0, 3);
+        // nextContainer.add(Block.select(0).drawOpen(50), 0, 0);
+        // nextContainer.add(nextBlock[1], 0, 1);
+        // nextContainer.add(nextBlock[2], 0, 2);
+        // nextContainer.add(nextBlock[3], 0, 3);
         nextContainer.setGridLinesVisible(true);
     
         panelContainer.setAlignment(Pos.CENTER);
@@ -337,61 +329,54 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     }
     public void generateFocus() {
         Random random = new Random();
+
         
-        Block[] TETROMINO = new Block[7];
 
         if (COUNT == 0) {
             for (int i = 0; i < next.length; i++) {
                 
-                TETROMINO[0] = new I_Block(Color.valueOf("#3498db"));
-                TETROMINO[1] = new J_Block(Color.valueOf("#f39c12")); 
-                TETROMINO[2] = new L_Block(Color.valueOf("#16a085")); 
-                TETROMINO[3] = new O_Block(Color.valueOf("#f1c40f")); 
-                TETROMINO[4] = new S_Block(Color.valueOf("#2ecc71")); 
-                TETROMINO[5] = new T_Block(Color.valueOf("#9b59b6")); 
-                TETROMINO[6] = new Z_Block(Color.valueOf("#e74c3c"));         
-                
-                next[i] = random.nextInt(TETROMINO.length);
+                next[i] = random.nextInt(7);
             }
         } 
 
         else {
             for (int i = 0; i < next.length-1; i++) {
                 next[i] = next[i+1];
-            }
+            }     
 
-            TETROMINO[0] = new I_Block(Color.valueOf("#3498db"));
-            TETROMINO[1] = new J_Block(Color.valueOf("#f39c12")); 
-            TETROMINO[2] = new L_Block(Color.valueOf("#16a085")); 
-            TETROMINO[3] = new O_Block(Color.valueOf("#f1c40f")); 
-            TETROMINO[4] = new S_Block(Color.valueOf("#2ecc71")); 
-            TETROMINO[5] = new T_Block(Color.valueOf("#9b59b6")); 
-            TETROMINO[6] = new Z_Block(Color.valueOf("#e74c3c"));         
-
-            next[next.length-1] = random.nextInt(TETROMINO.length);
+            next[next.length-1] = random.nextInt(7);
         }
 
+        // for (int i = 0; i < next.length; i++) {
+        //     nextBlock[i] = Block.select(next[i]);
+        // }
 
+
+        // Block[] TETRONIMO = {
+        //     new I_Block(Color.valueOf("#3498db")),
+        //     new J_Block(Color.valueOf("#f39c12")), 
+        //     new L_Block(Color.valueOf("#16a085")), 
+        //     new O_Block(Color.valueOf("#f1c40f")), 
+        //     new S_Block(Color.valueOf("#2ecc71")), 
+        //     new T_Block(Color.valueOf("#9b59b6")), 
+        //     new Z_Block(Color.valueOf("#e74c3c")) 
+        // };
+        
         variant = next[0];
-        focus = Block.create(TETROMINO[variant]);
-        focus.show();
+        focus = Block.select(variant, true);
+        focus.drawActive();
+        // focus = Block.create(TETRONIMO[variant]);
+        // focus.show();
 
         System.out.println("A new block has been created"); 
-        System.out.printf("%d | %d | %d | %d",next[0],next[1],next[2],next[3]);
+        // System.out.printf("%d | %d | %d | %d",next[0],next[1],next[2],next[3]);
     }
     public void generateGhost() {
-        Block[] TETROMINO = {
-            new I_Block(GHOST_FILL),
-            new J_Block(GHOST_FILL),
-            new L_Block(GHOST_FILL),
-            new O_Block(GHOST_FILL),
-            new S_Block(GHOST_FILL),
-            new T_Block(GHOST_FILL),
-            new Z_Block(GHOST_FILL)
-        };
-        ghost = Block.create(TETROMINO[variant]);
+
+    
+        ghost = Block.select(variant, true);
         if (showGhost) {
-            ghost.show();
+            ghost.drawActive();
 
             do { ghost.moveDown();
             } while ( !ghost.isBottomPoked() );
@@ -423,7 +408,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     }
     public void initGravity() {
         if (focus.isBottomPoked()) {
-            ghost.remove();
+            ghost.undraw();
             focus.collect();
             fx_drop.play();
 
