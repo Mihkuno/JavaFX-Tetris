@@ -23,4 +23,4 @@ The game is filled with simple transitions and a minimalist design.
 
 - SCORE is increased by plus ((3 * LEVEL) * COMBO) for each row clear 
 - SCORE is increased by plus (0.01 * LEVEL) for every S control (SPACEBAR is while looped)
-- SCORE is increased by plus (0.5 * LEVEL) for every new block creation (excluding hold) (UNDER CONSTRUCTION)
+- SCORE is increased by plus (0.5 * LEVEL) for every new block creation (excluding hold, except hold start)

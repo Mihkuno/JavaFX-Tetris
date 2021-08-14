@@ -1,6 +1,8 @@
 package proj.tetris;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -10,6 +12,9 @@ public interface TetrisInterface {
     int   ROW = 20;
     int   COL = 10;
     int   AREA = 27;
+
+    int PANEL_WIDTH = 100;
+    int PANEL_ARC = 10;
 
     int   GRID_XOFFSET = 240;
     int   GRID_YOFFSET = 30;
@@ -24,11 +29,8 @@ public interface TetrisInterface {
 
     ArrayList<Rectangle> blockCollection = new ArrayList<Rectangle>();
     
-    Rectangle[][] MESH = new Rectangle[ROW][COL]; 
-
-
-
     
+    Rectangle[][] MESH = new Rectangle[ROW][COL];     
 
          
 }

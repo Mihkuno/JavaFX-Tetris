@@ -1,6 +1,7 @@
 package proj.tetris.block;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
@@ -13,16 +14,17 @@ import proj.MainInterface;
 import proj.tetris.TetrisInterface;
 
 public abstract class Block implements MainInterface, TetrisInterface {
+   
     private float focusStartColumn = 3 * AREA;
     private float focusStartRow = -1 * AREA;
     private int rotateLoopCounter = 0;
-    private int variantCounter = 0;
+    private int phaseCounter = 0;
     private float column, row;
     private int counterX = 0;
-    private int counterY = 0;   
+    private int counterY = 0;  
     private boolean isRotateCollided;
     
-    private int[][] pickedVariant = block()[this.variantCounter];    
+    private int[][] pickedVariant = block()[this.phaseCounter];    
 
     private Rectangle[][] SQUARE = new Rectangle[ROW][COL];  
 
@@ -31,7 +33,7 @@ public abstract class Block implements MainInterface, TetrisInterface {
 
     public static final int length = TETRONIMO.length;
     
-    protected Color color; 
+    protected Color color;
 
     public Block(Color color) {
         this.color = color;
@@ -57,7 +59,6 @@ public abstract class Block implements MainInterface, TetrisInterface {
         if (color == false) {
             TETRONIMO[index].setColor(GHOST_FILL);
         }
-
         return TETRONIMO[index];
     }
 
@@ -70,40 +71,37 @@ public abstract class Block implements MainInterface, TetrisInterface {
     }
 
     public void moveRight() {
-        this.undraw();
         counterX += 1;
-        this.drawActive(counterX, counterY);
+        this.redrawActive(counterX, counterY);
     }
     public void moveLeft()  {
-        this.undraw();
         counterX -= 1;
-        this.drawActive(counterX, counterY); 
+        this.redrawActive(counterX, counterY); 
     }
     public void moveDown()  {
-        this.undraw();
         counterY += 1;
-        this.drawActive(counterX, counterY); 
+        this.redrawActive(counterX, counterY); 
     }
     public void moveUp()    {
-        this.undraw(); 
-        this.drawActive(counterX, --counterY); 
+        counterY -= 1;
+        this.redrawActive(counterX, counterY); 
     }
     
     public void rotate(boolean focusRestriction) {
 
         int previousVariationCount;
-        previousVariationCount = this.variantCounter;
+        previousVariationCount = this.phaseCounter;
 
         this.undraw();
-        this.variantCounter = (this.variantCounter + 1) % block().length;
-        this.pickedVariant = this.block()[this.variantCounter];
+        this.phaseCounter = (this.phaseCounter + 1) % block().length;
+        this.pickedVariant = this.block()[this.phaseCounter];
         this.drawActive(counterX, counterY);
 
         if (this.isNextBlockPoked() && focusRestriction == true) {
             System.out.println("block rotation is cancelled");
             this.undraw();
-            this.variantCounter = previousVariationCount;
-            this.pickedVariant = this.block()[this.variantCounter];
+            this.phaseCounter = previousVariationCount;
+            this.pickedVariant = this.block()[this.phaseCounter];
             this.drawActive(counterX, counterY);
             isRotateCollided = true;
         } 
@@ -115,8 +113,8 @@ public abstract class Block implements MainInterface, TetrisInterface {
                 if (this.isNextBlockPoked() && focusRestriction == true) {
                     System.out.println("block rotation is cancelled");
                     this.undraw();
-                    this.variantCounter = previousVariationCount;
-                    this.pickedVariant = this.block()[this.variantCounter];
+                    this.phaseCounter = previousVariationCount;
+                    this.pickedVariant = this.block()[this.phaseCounter];
                     this.drawActive(counterX, counterY);
                     isRotateCollided = true;
                 } 
@@ -130,8 +128,8 @@ public abstract class Block implements MainInterface, TetrisInterface {
                 if (this.isNextBlockPoked() && focusRestriction == true) {
                     System.out.println("block rotation is cancelled");
                     this.undraw();
-                    this.variantCounter = previousVariationCount;
-                    this.pickedVariant = this.block()[this.variantCounter];
+                    this.phaseCounter = previousVariationCount;
+                    this.pickedVariant = this.block()[this.phaseCounter];
                     this.drawActive(counterX, counterY);
                     isRotateCollided = true;
                 } 
@@ -144,8 +142,8 @@ public abstract class Block implements MainInterface, TetrisInterface {
             if (rotateLoopCounter >= 2 && focusRestriction == true) {
                 System.out.println("block rotation is cancelled");
                 this.undraw();
-                this.variantCounter = previousVariationCount;
-                this.pickedVariant = this.block()[this.variantCounter];
+                this.phaseCounter = previousVariationCount;
+                this.pickedVariant = this.block()[this.phaseCounter];
                 this.drawActive(counterX, counterY);
                 isRotateCollided = true;
             } 
@@ -185,7 +183,6 @@ public abstract class Block implements MainInterface, TetrisInterface {
         square.setHeight(AREA);
         square.setStroke(FOCUS_STROKE_COLOR);
         square.setStrokeWidth(FOCUS_STROKE_WIDTH);
-        square.setSmooth(true);
         square.setCache(true);
         square.setCacheHint(CacheHint.SPEED);
 
@@ -200,6 +197,35 @@ public abstract class Block implements MainInterface, TetrisInterface {
         
         return square;
     }
+
+
+    // overload.. with custom area
+    private Rectangle createSquare(float column, float row, int area){
+        
+        Rectangle square = new Rectangle();
+
+        square.setFill(color);
+        square.setX(column);
+        square.setY(row);
+        square.setWidth(area);
+        square.setHeight(area);
+        square.setStroke(FOCUS_STROKE_COLOR);
+        square.setStrokeWidth(FOCUS_STROKE_WIDTH);
+        square.setCache(true);
+        square.setCacheHint(CacheHint.SPEED);
+
+        DropShadow drop = new DropShadow();  
+        drop.setBlurType(BlurType.GAUSSIAN);
+        drop.setColor(Color.BLACK);  
+        drop.setHeight(1);  
+        drop.setWidth(1);  
+        drop.setSpread(0.5);  
+
+        square.setEffect(drop);
+        
+        return square;
+    }
+    
     
 
 
@@ -220,6 +246,7 @@ public abstract class Block implements MainInterface, TetrisInterface {
         }
     }
     // Overload.. used only in the first creation... arguments determine the location of where it spawns on the grid
+    @Deprecated
     public void drawActive(int counterX, int counterY) {
         this.counterX = counterX; this.counterY = counterY;
         for ( int r = 0; r < this.pickedVariant.length; r++){
@@ -237,15 +264,14 @@ public abstract class Block implements MainInterface, TetrisInterface {
     }
 
     // absolute position, used only for hold and next panels, must instantiate its own parent
-    public ArrayList<Rectangle> drawOpen() {
+    public ArrayList<Rectangle> drawOpen(float x, float y, int area) {
         ArrayList<Rectangle> block = new ArrayList<Rectangle>();
         for ( int r = 0; r < this.pickedVariant.length; r++){
             for ( int c = 0; c < this.pickedVariant.length; c++){
                 if (this.pickedVariant[r][c] == 1) { 
-                    /*optional*/
-                    column = ((c) * AREA);
-                    row    = ((r) * AREA);
-                    block.add(createSquare(column, row));
+                    column = x+(c * area);
+                    row    = y+(r * area);
+                    block.add(createSquare(column, row, area));
                 }
             }
         }
@@ -262,6 +288,41 @@ public abstract class Block implements MainInterface, TetrisInterface {
         }
     }
 
+    // faster version
+    public void redrawActive(int counterX, int counterY) {
+        this.counterX = counterX; this.counterY = counterY;
+        for ( int r = 0; r < this.pickedVariant.length; r++){
+            for ( int c = 0; c < this.pickedVariant.length; c++){
+
+                if (this.pickedVariant[r][c] == 1) { 
+                    LAYOUT.getChildren().remove(SQUARE[r][c]);
+
+                    column = (focusStartColumn + (counterX + c) * AREA) + GRID_XOFFSET;
+                    row    = (focusStartRow + (counterY + r) * AREA) + GRID_YOFFSET;
+                    
+                    SQUARE[r][c] = createSquare(column, row);
+                    LAYOUT.getChildren().add(SQUARE[r][c]);
+                }
+            }
+        }
+    }
+
+    public void redrawActive() {
+        for ( int r = 0; r < this.pickedVariant.length; r++){
+            for ( int c = 0; c < this.pickedVariant.length; c++){
+
+                if (this.pickedVariant[r][c] == 1) { 
+                    LAYOUT.getChildren().remove(SQUARE[r][c]);
+
+                    column = (focusStartColumn + (counterX + c) * AREA) + GRID_XOFFSET;
+                    row    = (focusStartRow + (counterY + r) * AREA) + GRID_YOFFSET;
+                    
+                    SQUARE[r][c] = createSquare(column, row);
+                    LAYOUT.getChildren().add(SQUARE[r][c]);
+                }
+            }
+        }
+    }
 
 
 

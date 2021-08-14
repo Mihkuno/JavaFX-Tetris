@@ -5,15 +5,16 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
+import javafx.scene.paint.Color;
 import javafx.scene.CacheHint;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -24,6 +25,7 @@ import proj.tetris.block.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -31,19 +33,26 @@ import java.util.Set;
 
 public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInterface{
 
-    private static final String StackPane = null;
-    AudioClip fx_drop = new AudioClip(this.getClass().getResource("../sound/fx_lnd01.mp3").toExternalForm());
-    AudioClip fx_move = new AudioClip(this.getClass().getResource("../sound/fx_move.mp3").toExternalForm());
-    AudioClip fx_rotate = new AudioClip(this.getClass().getResource("../sound/fx_rotate.mp3").toExternalForm());
-    AudioClip fx_clear = new AudioClip(this.getClass().getResource("../sound/fx_lne01.mp3").toExternalForm());
-    AudioClip fx_combo1 = new AudioClip(this.getClass().getResource("../sound/fx_lne02.mp3").toExternalForm());
-    AudioClip fx_combo2 = new AudioClip(this.getClass().getResource("../sound/fx_lne03.mp3").toExternalForm());
-    AudioClip fx_combo3 = new AudioClip(this.getClass().getResource("../sound/fx_lne04.mp3").toExternalForm());
+    AudioClip fx_drop, fx_move, fx_rotate, fx_hold, fx_lock, fx_clear, fx_combo1, fx_combo2, fx_combo3;
+
+    Rectangle nextPanel, holdPanel, scorePanel;
+    GridPane panelContainer, blockContainer, scoreContainer, titleContainer, nextContainer, holdContainer;
+    Text title_score, title_combo, title_count, title_lines, title_level, title_gain, title_hold, title_next, title_speed;
+
+    private Text val_gain = new Text(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
+    private Text val_score = new Text(Double.toString(SCORE));
+    private Text val_count = new Text(Integer.toString(COUNT));
+    private Text val_combo = new Text(Integer.toString(COMBO));
+    private Text val_lines = new Text(Integer.toString(LINES));
+    private Text val_level = new Text(Integer.toString(LEVEL));
+    private Text val_next = new Text(Integer.toString(NEXT));
+    private Text val_speed = new Text(Double.toString(SPEED));
     
     private int variant;
     private Block focus, ghost;
     private AnimationTimer gameLoop;
-    private int[] nextIndex = new int[4]; 
+    private int[] nextIndex = new int[5]; 
+    private Pane[] next = new Pane[nextIndex.length];
     private Block[] nextBlock = new Block[nextIndex.length]; 
 
     private boolean showGhost = true;
@@ -55,12 +64,15 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     static double SPEED = 0;
     static int GAINLN = 0;
     static int GAINUP = 5;
+    static int PAREA = 17;
     static int COUNT = 0;
     static int COMBO = 0;
     static int LEVEL = 0;
     static int LINES = 0;
-    static int HOLD = 0;
     static int NEXT = 0;
+
+    private Block HOLD = null;
+    private boolean hasSwitched = false;
 
     public Tetris() {
        startGame(true);
@@ -81,7 +93,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 double sleepNs = sleepMs * 1_000_000;
 
                 SPEED = SPEEDMS/1000;
-                updateScore();
                                 
                 // some delay
                 if ((now - prevTime) < sleepNs) {
@@ -90,18 +101,18 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 
                 prevTime = now;
 
-                System.out.println("---------------------------------------------------");
                 initGravity();
             }
         };
 
         if (startGame == true) {
+            
             this.generateGrid(false);
+            this.generateNext();
+            this.generatePanel();
             this.generateFocus();
             this.generateGhost();
-            this.generatePanel();
             
-    
             DOCUMENT.setOnKeyPressed(this);
             gameLoop.start();  
         }
@@ -119,39 +130,73 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     public void handle(KeyEvent key) {
 
         if (key.getText().equals("w")) { 
+            fx_rotate = new AudioClip(this.getClass().getResource("../sound/fx_rotate.mp3").toExternalForm());
             fx_rotate.play();
             focus.rotate(true); 
             if (showGhost && !focus.isRotateCollided()) {
                 ghost.rotate(false);
             }
+            if (showGhost) {
+                while (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
+                    ghost.moveUp();
+                }
+        
+                while ( !(ghost.isBottomPoked()) ) {
+                    ghost.moveDown();
+                }
+                focus.redrawActive();
+            }   
         }
         if (key.getText().equals("d")) { 
             if (!focus.isRightPoked()) {
                 focus.moveRight();  
+                fx_move = new AudioClip(this.getClass().getResource("../sound/fx_move.mp3").toExternalForm());
                 fx_move.play();
                 if (showGhost){
                     ghost.moveRight();
                 } 
             }
+            if (showGhost) {
+                while (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
+                    ghost.moveUp();
+                }
+        
+                while ( !(ghost.isBottomPoked()) ) {
+                    ghost.moveDown();
+                }
+                focus.redrawActive();
+            }   
         }
         if (key.getText().equals("a")) { 
             if (!focus.isLeftPoked()) {
                 focus.moveLeft();
+                fx_move = new AudioClip(this.getClass().getResource("../sound/fx_move.mp3").toExternalForm());
                 fx_move.play();
                 if (showGhost) {
                     ghost.moveLeft();
                 }  
             }
+            if (showGhost) {
+                while (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
+                    ghost.moveUp();
+                }
+        
+                while ( !(ghost.isBottomPoked()) ) {
+                    ghost.moveDown();
+                }
+                focus.redrawActive();
+            }   
         }
         if (key.getText().equals("s")) { 
             if (!focus.isBottomPoked()) {
-                fx_move.play();
                 focus.moveDown();
-                
-                SCORE += 0.01;
-                this.updateScore();
 
-                delayGravity(true);
+                fx_move = new AudioClip(this.getClass().getResource("../sound/fx_move.mp3").toExternalForm());
+                fx_move.play();
+                            
+                SCORE += 0.01;
+                this.delayGravity = true;
+                val_score.setText(Double.toString(Math.floor(SCORE * 100) / 100));
             }
         }
         if (key.getCode() == KeyCode.SPACE) {            
@@ -159,68 +204,137 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 focus.moveDown();
                 SCORE += 0.01;
             }
-            this.updateScore();
             initGravity();
         }
+        if (key.getCode() == KeyCode.SHIFT) {
 
+            // adds right and bottom margin in order to center O Block on the next panel
+            PAREA = 18; int x = nextIndex[0] == 3 ? -PAREA/2 : 0; int y = nextIndex[0] == 3 ? -PAREA : 0; 
 
-        if (showGhost) {
-            while (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
-                ghost.moveUp();
+            if (holdContainer.getChildren().isEmpty()) {
+
+                HOLD = nextBlock[0];
+    
+                focus.undraw();
+                ghost.undraw();
+    
+                // pull the next indexes
+                generateNext();
+    
+                // redraw the generated next nodes
+                updateNext();
+    
+                generateFocus();
             }
     
-            while ( !(ghost.isBottomPoked()) ) {
-                ghost.moveDown();
+            else if (hasSwitched == true) {
+                fx_lock = new AudioClip(this.getClass().getResource("../sound/fx_lock.mp3").toExternalForm());
+                fx_lock.play();
+            }   
+    
+            else if (!holdContainer.getChildren().isEmpty()) {
+    
+                HashMap<String,Integer> blockIndex = new HashMap<String,Integer>();
+                blockIndex.put("I_Block",0);
+                blockIndex.put("J_Block",1);
+                blockIndex.put("L_Block",2);
+                blockIndex.put("O_Block",3);
+                blockIndex.put("S_Block",4);
+                blockIndex.put("T_Block",5);
+                blockIndex.put("Z_Block",6);
+    
+                // clear the old hold
+                holdContainer.setGridLinesVisible(false);
+                holdContainer.getChildren().clear();
+    
+                // new hold << focus
+                String newHold = focus.getClass().getSimpleName();
+    
+                // undraw active
+                focus.undraw();
+                ghost.undraw();
+    
+                // generate focus previous hold
+                String oldHold = HOLD.getClass().getSimpleName();
+    
+                generateFocus(blockIndex.get(oldHold));
+    
+                // switch the previous hold to new hold
+                HOLD = Block.select(blockIndex.get(newHold), true);
+    
+            }       
+    
+            if (hasSwitched == false) {
+    
+                hasSwitched = true;
+    
+                fx_hold = new AudioClip(this.getClass().getResource("../sound/m_close.mp3").toExternalForm());
+                fx_hold.play();
+    
+                next[0] = new Pane();
+                next[0].setMinWidth(PAREA * 3);
+                next[0].getChildren().addAll(HOLD.drawOpen(x, y, PAREA));
+    
+                holdContainer.setGridLinesVisible(false);
+                holdContainer.add(next[0], 0, 0);
+                holdContainer.setAlignment(Pos.CENTER);
+                holdContainer.setGridLinesVisible(true);
+    
+                generateGhost();
             }
-            focus.undraw(); focus.drawActive();
-        }   
+        }
     }
-    public void delayGravity(boolean value) {
-        this.delayGravity = value;
-        gameLoop.stop(); gameLoop.start();
-    }
-  
 
-    private Text val_score = new Text(Double.toString(SCORE));
-    private Text val_count = new Text(Integer.toString(COUNT));
-    private Text val_combo = new Text(Integer.toString(COMBO));
-    private Text val_lines = new Text(Integer.toString(LINES));
-    private Text val_level = new Text(Integer.toString(LEVEL));
-    private Text val_hold = new Text(Integer.toString(HOLD));
-    private Text val_next = new Text(Integer.toString(NEXT));
-    private Text val_speed = new Text(Double.toString(SPEED));
-    private Text val_gain = new Text(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
 
-    public void updateScore() {
+    private void updateScore() {
         val_score.setText(Double.toString(Math.floor(SCORE * 100) / 100));
         val_combo.setText(Integer.toString(COMBO));
         val_count.setText(Integer.toString(COUNT));
         val_level.setText(Integer.toString(LEVEL));
         val_lines.setText(Integer.toString(LINES));
-        val_hold.setText(Integer.toString(HOLD));
+        // val_hold.setText(Integer.toString(HOLD));
         val_next.setText(Integer.toString(NEXT));
         val_speed.setText("x"+Double.toString(SPEED));
         val_gain.setText(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
     }
-    
-    
-    
-    GridPane panelContainer, blockContainer, scoreContainer, titleContainer, nextContainer;
-    Rectangle nextPanel, holdPanel, scorePanel;
-    Text title_score, title_combo, title_count, title_lines, title_level, title_gain, title_hold, title_next, title_speed;
 
-    int panelWidth = 100;
-    int panelArc = 10;  
+    private void updateNext() {
+        // validates a (not empty) start
+        if (nextIndex != null) {;
+
+            // clears the next panel
+            nextContainer.setGridLinesVisible(false);
+            nextContainer.getChildren().clear();
+
+
+            // loop through the next panel grid
+            for (int i = 1; i < nextIndex.length; i++) {
+                
+                // adds right and bottom margin in order to center O Block on the next panel
+                PAREA = 18; int x = nextIndex[i] == 3 ? -PAREA/2 : 0; int y = nextIndex[i] == 3 ? -PAREA : 0; 
+
+                next[i] = new Pane();
+                next[i].setMinWidth(PAREA * 3);
+                next[i].getChildren().addAll(nextBlock[i].drawOpen(x,y,PAREA));
+
+                nextContainer.add(next[i], 0, i-1);
+            }
+
+            nextContainer.setGridLinesVisible(true);
+        }
+    }
+    
     
     public void generatePanel() {
         Font title_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 17);
-        Font val_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 15);
+        Font val_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 13);
 
         panelContainer = new GridPane();
         blockContainer = new GridPane();
         scoreContainer = new GridPane();
         titleContainer = new GridPane();
         nextContainer = new GridPane();
+        holdContainer = new GridPane();
 
         nextPanel = new Rectangle();
         holdPanel = new Rectangle();
@@ -242,7 +356,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         val_lines.setFont(val_font);
         val_level.setFont(val_font);
         val_gain.setFont(val_font);
-        val_hold.setFont(val_font);
+        // val_hold.setFont(val_font);
         val_next.setFont(val_font);
         val_speed.setFont(val_font);
 
@@ -252,31 +366,29 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         title_level.setFont(title_font);
         title_gain.setFont(title_font);
         title_lines.setFont(title_font);
-        title_hold.setFont(title_font);
+        title_hold.setFont(val_font);
         title_next.setFont(title_font);
         title_speed.setFont(title_font);
 
-        title_hold.setTranslateX(15);
-        title_next.setTranslateX(15);
-        title_hold.setTranslateY(-35);
-        title_next.setTranslateY(-145);        
+        title_hold.setTranslateX(10);
+        title_hold.setTranslateY(-47);
         
-        scorePanel.setWidth(panelWidth);
+        scorePanel.setWidth(PANEL_WIDTH);
         scorePanel.setHeight(420);
-        scorePanel.setArcWidth(panelArc);
-        scorePanel.setArcHeight(panelArc);
+        scorePanel.setArcWidth(PANEL_ARC);
+        scorePanel.setArcHeight(PANEL_ARC);
         scorePanel.setFill(GRID_FILL);
 
-        nextPanel.setWidth(panelWidth);
+        nextPanel.setWidth(PANEL_WIDTH);
         nextPanel.setHeight(350);
-        nextPanel.setArcWidth(panelArc);
-        nextPanel.setArcHeight(panelArc);
+        nextPanel.setArcWidth(PANEL_ARC);
+        nextPanel.setArcHeight(PANEL_ARC);
         nextPanel.setFill(GRID_FILL);
 
-        holdPanel.setWidth(panelWidth);
+        holdPanel.setWidth(PANEL_WIDTH);
         holdPanel.setHeight(125);
-        holdPanel.setArcWidth(panelArc);
-        holdPanel.setArcHeight(panelArc);
+        holdPanel.setArcWidth(PANEL_ARC);
+        holdPanel.setArcHeight(PANEL_ARC);
         holdPanel.setFill(GRID_FILL);
 
         titleContainer.setMinWidth(scoreContainer.getWidth());
@@ -312,33 +424,27 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
         blockContainer.add(holdPanel,     0, 0);
         blockContainer.add(title_hold,    0, 0);
+        blockContainer.add(holdContainer, 0, 0);
+        // blockContainer.add(title_next,    0 ,0);
         blockContainer.add(nextPanel,     0, 1);
-        blockContainer.add(title_next,    0, 1);
         blockContainer.add(nextContainer, 0, 1);
-        blockContainer.setVgap(20);
-        blockContainer.setGridLinesVisible(true);
+        blockContainer.setVgap(20);     
+        
+        title_next.setTranslateY(-15);
 
+        nextContainer.setVgap(20);
+        nextContainer.setMaxHeight(nextPanel.getHeight());
         nextContainer.setAlignment(Pos.CENTER);
-        nextContainer.setVgap(50);
+        
 
-        /* block generator here */
-        Pane[] next = new Pane[nextIndex.length];
-        if (nextIndex != null) {
-            for (int i = 0; i < nextIndex.length; i++) {
-                next[i] = new Pane();
-                next[i].getChildren().addAll(nextBlock[i].drawOpen());
+        /* block generator here for nextContainer */
+        this.updateNext();
 
-                nextContainer.add(next[i], 0, i);
-            }
-        }
-        nextContainer.setGridLinesVisible(true);
-    
         panelContainer.setAlignment(Pos.CENTER);
         panelContainer.setMinHeight(DOCUMENT_HEIGHT);
         panelContainer.setMinWidth(DOCUMENT_WIDTH);
         panelContainer.setVgap(0); 
         panelContainer.setHgap(330);  
-        // panelContainer.setGridLinesVisible(true);
 
         panelContainer.add(scoreContainer, 0, 0);
         panelContainer.add(blockContainer, 1, 0);
@@ -346,50 +452,61 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         LAYOUT.getChildren().addAll(panelContainer);
     }
     
-    public void generateBlock() {
+    public void generateNext() {
         Random random = new Random();        
 
-        if (COUNT == 0) {
+        // generates four integer variants on start game
+        if (COUNT == 0 && HOLD == null) {
             for (int i = 0; i < nextIndex.length; i++) {
                 nextIndex[i] = random.nextInt(Block.length);
             }
         } 
-
         else {
+            // pull the first three index up
             for (int i = 0; i < nextIndex.length-1; i++) {
                 nextIndex[i] = nextIndex[i+1];
             }     
 
+            // generate a new index for the last array
             nextIndex[nextIndex.length-1] = random.nextInt(Block.length);
         }
 
+        // generate the blocks accoridingly to the indexes
         for (int i = 0; i < nextIndex.length; i++) {
             nextBlock[i] = Block.select(nextIndex[i], true);
         }
     }
-    public void generateFocus() {
-        generateBlock();
 
+
+    public void generateFocus() {
         variant = nextIndex[0];
         focus = Block.select(variant, true);
         focus.drawActive();
-
         System.out.println("A new block has been created"); 
-        System.out.printf("%d | %d | %d | %d",nextIndex[0],nextIndex[1],nextIndex[2],nextIndex[3]);
+        System.out.printf("%d | %d | %d | %d\n",nextIndex[0],nextIndex[1],nextIndex[2],nextIndex[3]);
     }
-    public void generateGhost() {
 
-    
+
+    public void generateGhost() {    
         ghost = Block.select(variant, false);
         if (showGhost) {
             ghost.drawActive();
-
             do { ghost.moveDown();
             } while ( !ghost.isBottomPoked() );
         }
     }
+
+
+    public void generateFocus(int variant) {
+        this.variant = variant;
+        focus = Block.select(variant, true);
+        focus.drawActive();
+        System.out.println("A new block has been created"); 
+        System.out.printf("%d | %d | %d | %d\n",nextIndex[0],nextIndex[1],nextIndex[2],nextIndex[3]);
+    }
+
+
     public void generateGrid(boolean enableAnimation) {
-        
         for ( int r = 0; r < ROW; r++){
             for( int c = 0; c < COL; c++){
                 Rectangle square = new Rectangle();
@@ -400,7 +517,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 square.setHeight(AREA);
                 square.setStroke(GRID_STROKE_COLOR);
                 square.setStrokeWidth(GRID_STROKE_WIDTH);
-                square.setSmooth(true);
                 square.setCache(true);
                 square.setCacheHint(CacheHint.SPEED);
 
@@ -412,26 +528,35 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
             }
         } 
     }
+
+
     public void initGravity() {
-        if (focus.isBottomPoked()) {
-            ghost.undraw();
-            focus.collect();
-            fx_drop.play();
+        System.out.println("---------------------------------------------------");
+        if (focus.isBottomPoked()) { 
 
-            COUNT++;
-            SCORE += 0.5;
-            this.updateScore();
+            fx_drop = new AudioClip(this.getClass().getResource("../sound/fx_lnd01.mp3").toExternalForm()); fx_drop.play();
 
+            COUNT++; SCORE += 0.5; hasSwitched = false;
+
+            ghost.undraw(); focus.collect();
+            
             validateLine();
+            generateNext();
             generateFocus();
-            generateGhost();
-        } else {
+            generateGhost(); 
+
+            this.updateScore();
+            this.updateNext();
+        } 
+        else {
             focus.moveDown();
             delayGravity = false;        
         }
     }
+
+
     public void validateLine() throws IndexOutOfBoundsException {
-        
+
         /* CLEARS FULL ROW LINES
             if counter of row (y) of block's squares equal 9 (full row), then...
             remove all the squares that correspond to the row layout and collection 
@@ -505,6 +630,11 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         */
 
         if (clearLine == true) {
+
+            fx_clear = new AudioClip(this.getClass().getResource("../sound/fx_lne01.mp3").toExternalForm());
+            fx_combo1 = new AudioClip(this.getClass().getResource("../sound/fx_lne02.mp3").toExternalForm());
+            fx_combo2 = new AudioClip(this.getClass().getResource("../sound/fx_lne03.mp3").toExternalForm());
+            fx_combo3 = new AudioClip(this.getClass().getResource("../sound/fx_lne04.mp3").toExternalForm());
 
             switch(COMBO) {
                 case (0) -> {fx_clear.play();   COMBO++;}
@@ -583,9 +713,10 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 // proceed to the nextIndex row filter group
             }
         } 
-        else {COMBO = 0; this.updateScore();}
+        else {COMBO = 0;}
         
     }
+
 
     @Deprecated
     public void showFocusDetails() {
