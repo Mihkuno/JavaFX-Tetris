@@ -287,15 +287,14 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
 
 
     private void updateScore() {
+        val_gain.setText(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
         val_score.setText(Double.toString(Math.floor(SCORE * 100) / 100));
         val_combo.setText(Integer.toString(COMBO));
         val_count.setText(Integer.toString(COUNT));
         val_level.setText(Integer.toString(LEVEL));
         val_lines.setText(Integer.toString(LINES));
-        // val_hold.setText(Integer.toString(HOLD));
         val_next.setText(Integer.toString(NEXT));
         val_speed.setText("x"+Double.toString(SPEED));
-        val_gain.setText(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
     }
 
     private void updateNext() {
@@ -356,7 +355,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         val_lines.setFont(val_font);
         val_level.setFont(val_font);
         val_gain.setFont(val_font);
-        // val_hold.setFont(val_font);
         val_next.setFont(val_font);
         val_speed.setFont(val_font);
 
@@ -366,12 +364,16 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         title_level.setFont(title_font);
         title_gain.setFont(title_font);
         title_lines.setFont(title_font);
-        title_hold.setFont(val_font);
-        title_next.setFont(title_font);
         title_speed.setFont(title_font);
 
-        title_hold.setTranslateX(10);
-        title_hold.setTranslateY(-47);
+        title_hold.setFont(val_font);
+        title_next.setFont(val_font);
+
+        title_hold.setTranslateX(6);
+        title_hold.setTranslateY(-52);
+
+        title_next.setTranslateX(6);
+        title_next.setTranslateY(-162);
         
         scorePanel.setWidth(PANEL_WIDTH);
         scorePanel.setHeight(420);
@@ -425,12 +427,10 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         blockContainer.add(holdPanel,     0, 0);
         blockContainer.add(title_hold,    0, 0);
         blockContainer.add(holdContainer, 0, 0);
-        // blockContainer.add(title_next,    0 ,0);
         blockContainer.add(nextPanel,     0, 1);
+        blockContainer.add(title_next,    0 ,1);
         blockContainer.add(nextContainer, 0, 1);
         blockContainer.setVgap(20);     
-        
-        title_next.setTranslateY(-15);
 
         nextContainer.setVgap(20);
         nextContainer.setMaxHeight(nextPanel.getHeight());
