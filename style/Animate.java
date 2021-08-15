@@ -34,7 +34,7 @@ public class Animate {
         decrease.play(); 
     }
 
-    public void start_fade(Node node) {
+    public FadeTransition start_fade(Node node) {
         fade = new FadeTransition();  
         fade.setDuration(Duration.millis(1300)); 
         fade.setCycleCount(1);  
@@ -42,6 +42,8 @@ public class Animate {
         fade.setToValue(1);   
         fade.setNode(node);
         fade.play();
+
+        return fade;
     }
 
     public FadeTransition mid_fade(Node node) {

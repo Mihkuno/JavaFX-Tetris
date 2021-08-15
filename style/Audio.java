@@ -16,7 +16,7 @@ public class Audio implements MainInterface {
 
 
     public static double V_SOUND = 1.0;
-    public static double V_MUSIC = 0.40;
+    public static double V_MUSIC = 0.30;
     private AudioClip sound;
     private MediaPlayer music;
 
@@ -56,13 +56,19 @@ public class Audio implements MainInterface {
 
     public static void setMusicFadeOut(int seconds) {
         for (MediaPlayer bgm : MUSIC) {
-            Timeline timeline = new Timeline(
-            new KeyFrame(Duration.seconds(seconds),
-                new KeyValue(bgm.volumeProperty(), 0)));
+            Timeline timeline = new Timeline( new KeyFrame(Duration.seconds(seconds), new KeyValue(bgm.volumeProperty(), 0)));
             timeline.play();
             timeline.setOnFinished((e) -> {
-                bgm.stop();
+                bgm.pause();
             });
+        }
+    }
+
+    public static void setMusicFadeIn(int seconds) {
+        for (MediaPlayer bgm : MUSIC) {
+            bgm.play();
+            Timeline timeline = new Timeline( new KeyFrame(Duration.seconds(seconds), new KeyValue(bgm.volumeProperty(), V_MUSIC)));
+            timeline.play();
         }
     }
 }

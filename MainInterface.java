@@ -1,7 +1,6 @@
 package proj;
 
 import java.util.ArrayList;
-
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;

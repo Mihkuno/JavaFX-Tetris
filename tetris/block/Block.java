@@ -22,7 +22,7 @@ public abstract class Block implements MainInterface, TetrisInterface {
     
     private int[][] pickedVariant = block()[this.phaseCounter];    
 
-    private Rectangle[][] SQUARE = new Rectangle[ROW][COL];  
+    public Rectangle[][] SQUARE = new Rectangle[ROW][COL];  
 
 
     private static Block[] TETRONIMO = new Block[7];

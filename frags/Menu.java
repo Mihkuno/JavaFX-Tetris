@@ -3,7 +3,6 @@ package proj.frags;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Pos;
-import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -29,21 +28,21 @@ public class Menu implements MainInterface {
     MediaPlayer bgm_intro;
     
     Image img_menu;
-    static ImageView bg_menu;
     TranslateTransition bg_anim;
+    public static ImageView bg_menu;
 
     static Text title_text;
     Font title_font;
     
-    static Button btn_start;
     Font btn_start_font;
     ScaleTransition btn_start_anim;
+    public static Button btn_start;
 
     Image img_setting;
-    static Button btn_setting;
+    public static Button btn_setting;
 
     Image img_info;
-    static Button btn_info;    
+    public static Button btn_info;    
 
 
     public Menu() {
@@ -120,7 +119,11 @@ public class Menu implements MainInterface {
             new Animate().end_fade(bg_menu);
             new Animate().end_swipe(INTRO_MISC, true);
             new Animate().end_swipe(INTRO, false)
-                .setOnFinished((e) -> { new Tetris(); });
+                .setOnFinished((e) -> { Tetris.start(); });
+
+            btn_info.setDisable(true);
+            btn_start.setDisable(true);
+            btn_setting.setDisable(true);
         }
         else if (button == "settings") {
             new Animate().mid_fade(bg_menu).setOnFinished((e) -> {
