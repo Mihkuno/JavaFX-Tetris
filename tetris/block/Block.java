@@ -1,13 +1,9 @@
 package proj.tetris.block;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import javafx.scene.CacheHint;
-import javafx.scene.Node;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import proj.MainInterface;

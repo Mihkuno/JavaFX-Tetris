@@ -4,15 +4,12 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.CacheHint;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import proj.MainInterface;
@@ -86,17 +83,16 @@ public class Settings implements MainInterface {
         btn_prev.setCursor(Cursor.CLOSED_HAND);
         btn_prev.setGraphic(new ImageView(new Image("proj/image/ic_prev.png",28,28,true,true)) ); 
         btn_prev.setStyle("-fx-background-color: none");
+        btn_prev.setTranslateX(-10);
 
-        Animate.hover_deflate(btn_prev);
+        new Animate().hover_deflate(btn_prev);
     }
 
     public static void initCase() {
         SETTINGS.setMaxWidth(300);
-        SETTINGS.setAlignment(Pos.CENTER); 
         SETTINGS.setPadding(new Insets(80, 30, 40, 30)); 
         SETTINGS.setVgap(50); 
         SETTINGS.setHgap(30);       
-        SETTINGS.setAlignment(Pos.CENTER);
         SETTINGS.add(lvl_sound, 0, 0);
         SETTINGS.add(txt_sound, 0, 0);
         SETTINGS.add(slider_sound, 0, 0);
@@ -104,14 +100,14 @@ public class Settings implements MainInterface {
         SETTINGS.add(txt_music, 0, 1); 
         SETTINGS.add(slider_music, 0, 1); 
         SETTINGS.add(btn_prev, 0, 2);
-        SETTINGS.setStyle("-fx-border-width:1px;-fx-border-color:#3d3d3d; -fx-border-radius: 20px;");
+        SETTINGS.setStyle("-fx-border-width:3px;-fx-border-color:#3d3d3d; -fx-border-radius: 10px;");
         // SETTINGS.setGridLinesVisible(true);
-        // SETTINGS.getStylesheets().add("proj/grid.css");
 
 
+        SETTINGS_CONTAINER.setTranslateY(500);
         SETTINGS_CONTAINER.setAlignment(Pos.CENTER);
         SETTINGS_CONTAINER.setMinWidth(DOCUMENT_WIDTH);
-        SETTINGS_CONTAINER.setMinHeight(DOCUMENT_HEIGHT);  
+        SETTINGS_CONTAINER.setMinHeight(DOCUMENT_HEIGHT);
     }
 
     public static void initInput() {
@@ -140,27 +136,27 @@ public class Settings implements MainInterface {
             pressed("prev");
         });
         btn_prev.setOnMouseExited((e) -> {
-            Animate.hover_deflate(btn_prev);
+            new Animate().hover_deflate(btn_prev);
         });
         btn_prev.setOnMouseEntered((e) -> {
             new Audio().playSound("../sound/m_hover.mp3");
-            Animate.hover_inflate(btn_prev);
+            new Animate().hover_inflate(btn_prev);
         });
     }
 
 
     private static void pressed(String button) {
         if (button == "prev") {
-            Animate.end_swipe(SETTINGS_CONTAINER, true).setOnFinished((e) -> {
+            new Animate().end_swipe(SETTINGS_CONTAINER, true).setOnFinished((e) -> {
                 remove();
                 Menu.btn_info.setDisable(false);
                 Menu.btn_start.setDisable(false);
                 Menu.btn_setting.setDisable(false);
                 
             });
-            Animate.mid_unfade(Menu.bg_menu).setOnFinished((e) -> {
-                Animate.start_swipe(Menu.INTRO, false);
-                Animate.start_swipe(Menu.INTRO_MISC, true);
+            new Animate().mid_unfade(Menu.bg_menu).setOnFinished((e) -> {
+                new Animate().start_swipe(Menu.INTRO, false);
+                new Animate().start_swipe(Menu.INTRO_MISC, true);
             });
             btn_prev.setDisable(true);
         }

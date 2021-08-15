@@ -8,14 +8,14 @@ import javafx.util.Duration;
 
 public class Animate {
     
-    static ScaleTransition increase;
-    static ScaleTransition decrease;
-    static FadeTransition fade;
-    static TranslateTransition swipe;
-    static TranslateTransition bounce;
+    ScaleTransition increase;
+    ScaleTransition decrease;
+    FadeTransition fade;
+    TranslateTransition swipe;
+    TranslateTransition bounce;
 
 
-    public static void hover_inflate(Node node) {
+    public void hover_inflate(Node node) {
         increase = new ScaleTransition(); 
         increase.setDuration(Duration.millis(100)); 
         increase.setNode(node); 
@@ -25,7 +25,7 @@ public class Animate {
         
     }
 
-    public static void hover_deflate(Node node) {
+    public void hover_deflate(Node node) {
         decrease = new ScaleTransition(); 
         decrease.setDuration(Duration.millis(100)); 
         decrease.setNode(node); 
@@ -34,7 +34,7 @@ public class Animate {
         decrease.play(); 
     }
 
-    public static void start_fade(Node node) {
+    public void start_fade(Node node) {
         fade = new FadeTransition();  
         fade.setDuration(Duration.millis(1300)); 
         fade.setCycleCount(1);  
@@ -44,7 +44,7 @@ public class Animate {
         fade.play();
     }
 
-    public static FadeTransition mid_fade(Node node) {
+    public FadeTransition mid_fade(Node node) {
         fade = new FadeTransition();  
         fade.setDuration(Duration.millis(1000)); 
         fade.setCycleCount(1);  
@@ -55,7 +55,7 @@ public class Animate {
         return fade;
     }
 
-    public static FadeTransition mid_unfade(Node node) {
+    public FadeTransition mid_unfade(Node node) {
         fade = new FadeTransition();  
         fade.setDuration(Duration.millis(1000)); 
         fade.setCycleCount(1);  
@@ -67,7 +67,7 @@ public class Animate {
     }
 
 
-    public static void end_fade(Node node) {
+    public void end_fade(Node node) {
         fade = new FadeTransition();  
         fade.setDuration(Duration.millis(1800)); 
         fade.setCycleCount(1);  
@@ -77,7 +77,7 @@ public class Animate {
         fade.play();
     }
 
-    public static TranslateTransition start_swipe(Node node, boolean direction) {
+    public TranslateTransition start_swipe(Node node, boolean direction) {
 
         int init = direction ? -20 : 20;
         double z = direction ? 500 : -500;
@@ -115,7 +115,7 @@ public class Animate {
         return bounce;
     }
 
-    public static TranslateTransition start_swipe(Node node, boolean direction, int speed) {
+    public TranslateTransition start_swipe(Node node, boolean direction, int speed) {
 
         int init = direction ? -20 : 20;
         double z = direction ? 500 : -500;
@@ -153,7 +153,7 @@ public class Animate {
         return bounce;
     }
 
-    public static TranslateTransition end_swipe(Node node, boolean direction) {
+    public TranslateTransition end_swipe(Node node, boolean direction) {
 
         int init = direction ? -20 : 20;
         double z = direction ? 500 : -500;

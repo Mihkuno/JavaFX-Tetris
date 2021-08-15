@@ -17,7 +17,7 @@ The game is filled with simple transitions and a minimalist design.
 
 - SPEED starts at 1
 - SPEED is decreased by 100ms per LEVEL 
-- SPEED is decreased by 350ms (briefly) for every S control
+- SPEED is increased by 350ms (briefly) for every S control
 
 - LEVEL is increased every line GAIN of GAINUP += (5 + LEVEL)
 

@@ -2,15 +2,11 @@ package proj.tetris;
 
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.AudioClip;
-import javafx.scene.paint.Color;
 import javafx.scene.CacheHint;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -234,6 +230,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
     
             else if (!holdContainer.getChildren().isEmpty()) {
     
+                // map class names to their index
                 HashMap<String,Integer> blockIndex = new HashMap<String,Integer>();
                 blockIndex.put("I_Block",0);
                 blockIndex.put("J_Block",1);
@@ -436,7 +433,6 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
         nextContainer.setMaxHeight(nextPanel.getHeight());
         nextContainer.setAlignment(Pos.CENTER);
         
-
         /* block generator here for nextContainer */
         this.updateNext();
 
@@ -523,7 +519,7 @@ public class Tetris implements MainInterface, EventHandler<KeyEvent>, TetrisInte
                 MESH[r][c] = square;
                 LAYOUT.getChildren().add(MESH[r][c]);
 
-                if (enableAnimation == true) {Animate.start_swipe(MESH[r][c], false, 800);}
+                if (enableAnimation == true) {new Animate().start_swipe(MESH[r][c], false, 800);}
                 
             }
         } 

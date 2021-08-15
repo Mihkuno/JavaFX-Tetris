@@ -73,13 +73,13 @@ public class Menu implements MainInterface {
             );
         });
         btn_start.setOnMouseExited((e) -> { 
-            Animate.hover_deflate(btn_start); 
+            new Animate().hover_deflate(btn_start); 
             btn_start_anim.play(); 
         });
         btn_start.setOnMouseEntered((e) -> { 
             btn_start_anim.stop(); 
             new Audio().playSound("../sound/m_hover.mp3");
-            Animate.hover_inflate(btn_start); 
+            new Animate().hover_inflate(btn_start); 
         });
 
 
@@ -89,10 +89,10 @@ public class Menu implements MainInterface {
         });
         btn_info.setOnMouseEntered((e) -> {
             new Audio().playSound("../sound/m_hover.mp3");
-            Animate.hover_inflate(btn_info);
+            new Animate().hover_inflate(btn_info);
         }); 
         btn_info.setOnMouseExited((e) -> {
-            Animate.hover_deflate(btn_info);
+            new Animate().hover_deflate(btn_info);
         });
 
 
@@ -102,10 +102,10 @@ public class Menu implements MainInterface {
         });
         btn_setting.setOnMouseEntered((e) -> {
             new Audio().playSound("../sound/m_hover.mp3");
-            Animate.hover_inflate(btn_setting);
+            new Animate().hover_inflate(btn_setting);
         });        
         btn_setting.setOnMouseExited((e) -> {
-            Animate.hover_deflate(btn_setting);
+            new Animate().hover_deflate(btn_setting);
         });
         
         
@@ -116,19 +116,19 @@ public class Menu implements MainInterface {
 
             Audio.setMusicFadeOut(2);
 
-            Animate.end_fade(INTRO); 
-            Animate.end_fade(bg_menu);
-            Animate.end_swipe(INTRO_MISC, true);
-            Animate.end_swipe(INTRO, false)
+            new Animate().end_fade(INTRO); 
+            new Animate().end_fade(bg_menu);
+            new Animate().end_swipe(INTRO_MISC, true);
+            new Animate().end_swipe(INTRO, false)
                 .setOnFinished((e) -> { new Tetris(); });
         }
         else if (button == "settings") {
-            Animate.mid_fade(bg_menu).setOnFinished((e) -> {
-                Animate.start_swipe(SETTINGS_CONTAINER, true);
+            new Animate().mid_fade(bg_menu).setOnFinished((e) -> {
                 Settings.show();
+                new Animate().start_swipe(SETTINGS_CONTAINER, true);
             });
-            Animate.end_swipe(INTRO_MISC, true);
-            Animate.end_swipe(INTRO, false);
+            new Animate().end_swipe(INTRO_MISC, true);
+            new Animate().end_swipe(INTRO, false);
         }
 
         btn_info.setDisable(true);
@@ -162,12 +162,12 @@ public class Menu implements MainInterface {
         btn_start_anim.play(); 
 
         // init is inflated.. must deflate
-        Animate.hover_deflate(btn_info); 
-        Animate.hover_deflate(btn_setting);
+        new Animate().hover_deflate(btn_info); 
+        new Animate().hover_deflate(btn_setting);
 
-        Animate.start_fade(title_text); 
-        Animate.start_fade(btn_start); 
-        Animate.start_fade(bg_menu);
+        new Animate().start_fade(title_text); 
+        new Animate().start_fade(btn_start); 
+        new Animate().start_fade(bg_menu);
     }
 
     private void initObj() {
@@ -177,17 +177,13 @@ public class Menu implements MainInterface {
         bg_menu.smoothProperty().set(true);
         bg_menu.setFitWidth(DOCUMENT_WIDTH + 250);
         bg_menu.setFitHeight(DOCUMENT_HEIGHT + 50);
-        bg_menu.setX(-120);
-        bg_menu.setCache(true);
-        bg_menu.setCacheHint(CacheHint.SPEED);        
+        bg_menu.setX(-120);      
 
         // title text object
         title_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream("proj/font/JoystickBold-62LA.ttf"), 140);
         title_text = new Text();
         title_text.setFont(title_font);
         title_text.setText("Tetris");
-        title_text.setCache(true);
-        title_text.setCacheHint(CacheHint.SPEED);
 
         // start button object
         btn_start_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 30);
@@ -204,8 +200,6 @@ public class Menu implements MainInterface {
             "-fx-min-height: 60px; "+
             "-fx-background-color: #2ecc71"
         );
-        btn_start.setCache(true);
-        btn_start.setCacheHint(CacheHint.SPEED);
 
         // settings button
         img_setting = new Image("proj/image/ic_setting.png");
@@ -213,8 +207,6 @@ public class Menu implements MainInterface {
         btn_setting.setCursor(Cursor.CLOSED_HAND);
         btn_setting.setGraphic(new ImageView(img_setting) ); 
         btn_setting.setStyle("-fx-background-color: none");
-        btn_setting.setCache(true);
-        btn_setting.setCacheHint(CacheHint.SPEED);
 
 
         // info button
@@ -223,8 +215,6 @@ public class Menu implements MainInterface {
         btn_info.setCursor(Cursor.CLOSED_HAND);
         btn_info.setGraphic(new ImageView(img_info) ); 
         btn_info.setStyle("-fx-background-color: none");
-        btn_info.setCache(true);
-        btn_info.setCacheHint(CacheHint.SPEED);
 
         // background music
         new Audio().playMusic("src/proj/sound/bg_wires.mp3");
