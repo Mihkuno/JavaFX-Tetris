@@ -21,8 +21,12 @@ public interface MainInterface {
     HBox INTRO_MISC = new HBox();
     HBox SETTINGS_MISC = new HBox();
     VBox INTRO_CONTAINER = new VBox();
+    
     GridPane SETTINGS = new GridPane();
     VBox SETTINGS_CONTAINER = new VBox();
+
+    GridPane INFO = new GridPane();
+    VBox INFO_CONTAINER = new VBox();
 
     Pane LAYOUT = new Pane();
     Scene DOCUMENT = new Scene(LAYOUT, DOCUMENT_WIDTH, DOCUMENT_HEIGHT, BACKGROUND);

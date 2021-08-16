@@ -85,6 +85,7 @@ public class Menu implements MainInterface {
 
         btn_info.setOnMousePressed((e) -> {
             new Audio().playSound("../sound/m_click.mp3");
+            pressed("info");
         });
         btn_info.setOnMouseEntered((e) -> {
             new Audio().playSound("../sound/m_hover.mp3");
@@ -120,15 +121,20 @@ public class Menu implements MainInterface {
             new Animate().end_swipe(INTRO_MISC, true);
             new Animate().end_swipe(INTRO, false)
                 .setOnFinished((e) -> { Tetris.start(); });
-
-            btn_info.setDisable(true);
-            btn_start.setDisable(true);
-            btn_setting.setDisable(true);
         }
         else if (button == "settings") {
             new Animate().mid_fade(bg_menu).setOnFinished((e) -> {
                 Settings.show();
                 new Animate().start_swipe(SETTINGS_CONTAINER, true);
+            });
+            new Animate().end_swipe(INTRO_MISC, true);
+            new Animate().end_swipe(INTRO, false);
+        }
+
+        else if (button == "info") {
+            new Animate().mid_fade(bg_menu).setOnFinished((e) -> {
+                Info.show();
+                new Animate().start_swipe(INFO_CONTAINER, true);
             });
             new Animate().end_swipe(INTRO_MISC, true);
             new Animate().end_swipe(INTRO, false);
