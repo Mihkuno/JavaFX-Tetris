@@ -79,6 +79,9 @@ public class Info implements MainInterface {
     }
 
     public static void initCase() {
+
+        INFO.setGridLinesVisible(false);
+
         INFO.setMaxWidth(300);
         INFO.setAlignment(Pos.CENTER);
         INFO.setPadding(new Insets(60, 30, 60, 30)); 
@@ -90,12 +93,13 @@ public class Info implements MainInterface {
         INFO.add(btn_hub,  1, 1);
         INFO.add(btn_twt,  1, 1);
         INFO.setStyle("-fx-border-width:3px;-fx-border-color:#3d3d3d; -fx-border-radius: 10px;");
-        INFO.setGridLinesVisible(true);
 
         INFO_CONTAINER.setTranslateY(500);
         INFO_CONTAINER.setAlignment(Pos.CENTER);
         INFO_CONTAINER.setMinWidth(DOCUMENT_WIDTH);
         INFO_CONTAINER.setMinHeight(DOCUMENT_HEIGHT);
+
+        if (proj.frags.Settings.SHOWGRID) { INFO.setGridLinesVisible(true); }
     }
 
     public static void initInput() {

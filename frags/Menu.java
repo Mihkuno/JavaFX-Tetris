@@ -230,6 +230,7 @@ public class Menu implements MainInterface {
     }
 
     private void initCase() {
+
         INTRO.setAlignment(Pos.CENTER);
         INTRO.getChildren().addAll(title_text,btn_start);
 

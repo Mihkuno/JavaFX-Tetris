@@ -4,7 +4,6 @@ import javafx.animation.AnimationTimer;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.AudioClip;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -269,7 +268,10 @@ public class Tetris implements MainInterface, TetrisInterface{
                         holdContainer.setGridLinesVisible(false);
                         holdContainer.add(next[0], 0, 0);
                         holdContainer.setAlignment(Pos.CENTER);
-                        holdContainer.setGridLinesVisible(true);
+
+                        if (proj.frags.Settings.SHOWGRID) {
+                            holdContainer.setGridLinesVisible(true);
+                        }
 
                         ghost.undraw();
                         generateGhost();
@@ -323,7 +325,9 @@ public class Tetris implements MainInterface, TetrisInterface{
                 nextContainer.add(next[i], 0, i-1);
             }
 
-            nextContainer.setGridLinesVisible(true);
+            if (proj.frags.Settings.SHOWGRID) {
+                nextContainer.setGridLinesVisible(true);
+            }
         }
     }
     
@@ -404,6 +408,7 @@ public class Tetris implements MainInterface, TetrisInterface{
         btn_prev.setGraphic(new ImageView(new Image("proj/image/ic_prev.png",28,28,true,true)) ); 
         btn_prev.setStyle("-fx-background-color: none");
         btn_prev.setTranslateX(-10);
+        btn_prev.setTranslateY(10);
         btn_prev.setFocusTraversable(false);
         btn_prev.setDisable(true);
 
@@ -479,6 +484,15 @@ public class Tetris implements MainInterface, TetrisInterface{
         panelContainer.add(blockContainer, 1, 0);
 
         LAYOUT.getChildren().addAll(panelContainer);
+
+        if (proj.frags.Settings.SHOWGRID) {
+            panelContainer.setGridLinesVisible(true);
+            nextContainer.setGridLinesVisible(true);
+            blockContainer.setGridLinesVisible(true);
+            scoreContainer.setGridLinesVisible(true);
+            titleContainer.setGridLinesVisible(true);
+            holdContainer.setGridLinesVisible(true);
+        }
     }
 
     private static void pressed(String button) {

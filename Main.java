@@ -9,7 +9,7 @@ public class Main extends Application implements MainInterface {
     public static void main(String[] args) { launch(args); }    
     @Override
     public void start(Stage WINDOW) throws Exception {
-        
+
         new Menu();  
         // new Tetris();
 

@@ -9,11 +9,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import proj.MainInterface;
 import proj.style.Animate;
 import proj.style.Audio;
+import proj.style.ToggleSwitch;
+import javafx.scene.paint.Color;
 
 public class Settings implements MainInterface {
     static Slider slider_music;
@@ -29,6 +33,13 @@ public class Settings implements MainInterface {
 
     static Button btn_prev;
 
+    static GridPane TOGGLE_CONTAINER = new GridPane();
+
+    static ToggleSwitch tgl_grid;
+    static Text txt_grid;
+
+    public static boolean SHOWGRID = false;
+
     public static void show() {
         initObj();
         initCase();
@@ -41,6 +52,7 @@ public class Settings implements MainInterface {
 
     public static void remove() {
         SETTINGS.getChildren().clear();
+        TOGGLE_CONTAINER.getChildren().clear();
         SETTINGS_CONTAINER.getChildren().clear();
         LAYOUT.getChildren().remove(SETTINGS_CONTAINER);
     }
@@ -84,32 +96,107 @@ public class Settings implements MainInterface {
         btn_prev.setStyle("-fx-background-color: none");
         btn_prev.setTranslateX(-10);
 
+        txt_grid = new Text("Show grid");
+        txt_grid.setFont(txt_font);
+        tgl_grid = new ToggleSwitch();
+        tgl_grid.setTranslateX(-40);
+
+
+        if (SHOWGRID == false) {
+            tgl_grid.button.setStyle(tgl_grid.buttonStyleOff);
+            tgl_grid.back.setFill(Color.valueOf("#ced5da"));
+            StackPane.setAlignment(tgl_grid.button, Pos.CENTER_LEFT);
+            tgl_grid.state = SHOWGRID;
+            
+            TOGGLE_CONTAINER.setGridLinesVisible(false);
+            SETTINGS.setGridLinesVisible(false);
+        
+        } else {
+
+            tgl_grid.button.setStyle(tgl_grid.buttonStyleOn);
+            tgl_grid.back.setFill(Color.valueOf("#80C49E"));
+            StackPane.setAlignment(tgl_grid.button, Pos.CENTER_RIGHT);
+            tgl_grid.state = SHOWGRID;
+            
+            TOGGLE_CONTAINER.setGridLinesVisible(true);
+            SETTINGS.setGridLinesVisible(true);
+        }
+
         new Animate().hover_deflate(btn_prev);
     }
 
+    public static void toggleGrid() {
+        if (SHOWGRID == true) {
+
+            SHOWGRID = false;
+
+            tgl_grid.button.setStyle(tgl_grid.buttonStyleOff);
+            tgl_grid.back.setFill(Color.valueOf("#ced5da"));
+            StackPane.setAlignment(tgl_grid.button, Pos.CENTER_LEFT);
+            tgl_grid.state = SHOWGRID;
+            
+            TOGGLE_CONTAINER.setGridLinesVisible(false);
+            SETTINGS.setGridLinesVisible(false);
+        
+        } else {
+
+            SHOWGRID = true;
+
+            tgl_grid.button.setStyle(tgl_grid.buttonStyleOn);
+            tgl_grid.back.setFill(Color.valueOf("#80C49E"));
+            StackPane.setAlignment(tgl_grid.button, Pos.CENTER_RIGHT);
+            tgl_grid.state = SHOWGRID;
+            
+            TOGGLE_CONTAINER.setGridLinesVisible(true);
+            SETTINGS.setGridLinesVisible(true);
+        }
+    }
+
     public static void initCase() {
+
+        TOGGLE_CONTAINER.setGridLinesVisible(false);
+        SETTINGS.setGridLinesVisible(false);
+
+        TOGGLE_CONTAINER.setHgap(50);
+        TOGGLE_CONTAINER.add(txt_grid, 0, 0);
+        TOGGLE_CONTAINER.add(tgl_grid, 1, 0);
+
         SETTINGS.setMaxWidth(300);
         SETTINGS.setPadding(new Insets(80, 30, 40, 30)); 
-        SETTINGS.setVgap(50); 
+        SETTINGS.setVgap(40); 
         SETTINGS.setHgap(30);       
-        SETTINGS.add(lvl_sound, 0, 0);
-        SETTINGS.add(txt_sound, 0, 0);
-        SETTINGS.add(slider_sound, 0, 0);
-        SETTINGS.add(lvl_music, 0, 1);
-        SETTINGS.add(txt_music, 0, 1); 
-        SETTINGS.add(slider_music, 0, 1); 
-        SETTINGS.add(btn_prev, 0, 2);
+        SETTINGS.add(lvl_sound,        0, 0);
+        SETTINGS.add(txt_sound,        0, 0);
+        SETTINGS.add(slider_sound,     0, 0);
+        SETTINGS.add(lvl_music,        0, 1);
+        SETTINGS.add(txt_music,        0, 1); 
+        SETTINGS.add(slider_music,     0, 1); 
+        SETTINGS.add(TOGGLE_CONTAINER, 0, 2);
+        SETTINGS.add(btn_prev,         0, 3);
+        
         SETTINGS.setStyle("-fx-border-width:3px;-fx-border-color:#3d3d3d; -fx-border-radius: 10px;");
-        // SETTINGS.setGridLinesVisible(true);
-
 
         SETTINGS_CONTAINER.setTranslateY(500);
         SETTINGS_CONTAINER.setAlignment(Pos.CENTER);
         SETTINGS_CONTAINER.setMinWidth(DOCUMENT_WIDTH);
         SETTINGS_CONTAINER.setMinHeight(DOCUMENT_HEIGHT);
+
+        if (SHOWGRID) {
+            TOGGLE_CONTAINER.setGridLinesVisible(true);
+            SETTINGS.setGridLinesVisible(true);
+        }
     }
 
     public static void initInput() {
+
+        tgl_grid.setOnMouseClicked((e) -> { 
+            toggleGrid(); 
+        });
+
+        tgl_grid.getButton().setOnMouseClicked((e) -> { 
+            toggleGrid(); 
+        });
+
         slider_music.valueProperty().addListener(new InvalidationListener() {
             @Override
             public void invalidated(Observable observable) {
