@@ -13,6 +13,10 @@ import proj.style.Animate;
 import proj.style.Audio;
 
 import java.io.IOException;
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class Info implements MainInterface {
 
@@ -46,21 +50,21 @@ public class Info implements MainInterface {
 
         btn_prev = new Button("Back");
         btn_prev.setFont(txt_font);
-        btn_prev.setCursor(Cursor.CLOSED_HAND);
+        btn_prev.setCursor(Cursor.HAND);
         btn_prev.setGraphic(new ImageView(new Image("proj/image/ic_prev.png",28,28,true,true)) ); 
         btn_prev.setStyle("-fx-background-color: none");
         btn_prev.setTranslateX(-10);
 
         btn_hub = new Button();
         btn_hub.setFont(txt_font);
-        btn_hub.setCursor(Cursor.CLOSED_HAND);
+        btn_hub.setCursor(Cursor.HAND);
         btn_hub.setGraphic(new ImageView(new Image("proj/image/GitHub-Mark-64px.png",28,28,true,true)) ); 
         btn_hub.setStyle("-fx-background-color: none");
         btn_hub.setTranslateX(80);
 
         btn_twt = new Button();
         btn_twt.setFont(txt_font);
-        btn_twt.setCursor(Cursor.CLOSED_HAND);
+        btn_twt.setCursor(Cursor.HAND);
         btn_twt.setGraphic(new ImageView(new Image("proj/image/twitter-circled-48.png",35,35,true,true)) ); 
         btn_twt.setStyle("-fx-background-color: none");
         btn_twt.setTranslateX(40);
@@ -168,10 +172,24 @@ public class Info implements MainInterface {
     }
 
     public static void openWebpage(String url) {
-        try {
-            new ProcessBuilder("x-www-browser", url).start();
-        } catch (IOException e) {
-            e.printStackTrace();
+        // try {
+        //     new ProcessBuilder("x-www-browser", url).start();
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
+
+        if (Desktop.isDesktopSupported() &&     
+            Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+            try {
+                Desktop.getDesktop().browse(new URI(url));
+            }
+
+            catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            System.out.println("not supported");
         }
     }
 

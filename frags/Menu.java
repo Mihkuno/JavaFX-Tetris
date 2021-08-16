@@ -198,7 +198,7 @@ public class Menu implements MainInterface {
         btn_start_font = Font.loadFont( Tetris.class.getClassLoader().getResourceAsStream( "proj/font/TrulyMadlyDpad-a72o.ttf"), 30);
         btn_start = new Button("start");
         btn_start.setTextFill(Color.WHITESMOKE);
-        btn_start.setCursor(Cursor.CLOSED_HAND);
+        btn_start.setCursor(Cursor.HAND);
         btn_start.setFont(btn_start_font);
         btn_start.setMinHeight(50);
         btn_start.setMinWidth(50);
@@ -213,7 +213,7 @@ public class Menu implements MainInterface {
         // settings button
         img_setting = new Image("proj/image/ic_setting.png");
         btn_setting = new Button();
-        btn_setting.setCursor(Cursor.CLOSED_HAND);
+        btn_setting.setCursor(Cursor.HAND);
         btn_setting.setGraphic(new ImageView(img_setting) ); 
         btn_setting.setStyle("-fx-background-color: none");
 
@@ -221,7 +221,7 @@ public class Menu implements MainInterface {
         // info button
         img_info = new Image("proj/image/ic_info.png");
         btn_info = new Button();
-        btn_info.setCursor(Cursor.CLOSED_HAND);
+        btn_info.setCursor(Cursor.HAND);
         btn_info.setGraphic(new ImageView(img_info) ); 
         btn_info.setStyle("-fx-background-color: none");
 

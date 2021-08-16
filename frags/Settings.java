@@ -91,7 +91,7 @@ public class Settings implements MainInterface {
 
         btn_prev = new Button("Back");
         btn_prev.setFont(txt_font);
-        btn_prev.setCursor(Cursor.CLOSED_HAND);
+        btn_prev.setCursor(Cursor.HAND);
         btn_prev.setGraphic(new ImageView(new Image("proj/image/ic_prev.png",28,28,true,true)) ); 
         btn_prev.setStyle("-fx-background-color: none");
         btn_prev.setTranslateX(-10);
