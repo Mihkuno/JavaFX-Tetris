@@ -69,7 +69,7 @@ public class Animate {
     }
 
 
-    public void end_fade(Node node) {
+    public FadeTransition end_fade(Node node) {
         fade = new FadeTransition();  
         fade.setDuration(Duration.millis(1800)); 
         fade.setCycleCount(1);  
@@ -77,6 +77,7 @@ public class Animate {
         fade.setToValue(0);   
         fade.setNode(node);
         fade.play();
+        return fade;
     }
 
     public TranslateTransition start_swipe(Node node, boolean direction) {

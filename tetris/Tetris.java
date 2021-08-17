@@ -72,46 +72,47 @@ public class Tetris implements MainInterface, TetrisInterface {
     private static Block HOLD = null;
     private static boolean hasSwitched = false;
 
+    public static void init() {
+
+        gameLoop = new AnimationTimer() {
+            long prevTime = 0;   
+            @Override
+            public void handle(long now) {
+                double sleepMs = delayGravity ? (SPEEDMS + 350) : SPEEDMS;
+                double sleepNs = sleepMs * 1_000_000;
+                SPEED = SPEEDMS/1000; 
+                // some delay
+                if ((now - prevTime) < sleepNs) {
+                    return;
+                }
+                prevTime = now;
+                initGravity();
+            }
+        };
+
+        
+
+        if (nextBlock[0] == null) {
+            generateNext();
+        }
+
+        if (panelContainer == null) {
+            generateGrid(); 
+            generatePanel();
+        }
+    }
+
     public static void start() {
         startGame = true;
 
+        // LOADING ANIMATION
+        Image bg_anim = new Image("proj/image/loading.gif");
+        ImageView view_bg_anim = new ImageView(bg_anim);
+        view_bg_anim.setTranslateX(180);
+        view_bg_anim.setTranslateY(130);
+        LAYOUT.getChildren().add(view_bg_anim);
+
         if (startGame == true) {
-            
-            // LOADING ANIMATION
-            Image bg_anim = new Image("proj/image/loading.gif");
-            ImageView view_bg_anim = new ImageView(bg_anim);
-            view_bg_anim.setTranslateX(180);
-            view_bg_anim.setTranslateY(130);
-            LAYOUT.getChildren().add(view_bg_anim);
-
-
-            gameLoop = new AnimationTimer() {
-                long prevTime = 0;   
-                @Override
-                public void handle(long now) {
-                    double sleepMs = delayGravity ? (SPEEDMS + 350) : SPEEDMS;
-                    double sleepNs = sleepMs * 1_000_000;
-                    SPEED = SPEEDMS/1000; 
-                    // some delay
-                    if ((now - prevTime) < sleepNs) {
-                        return;
-                    }
-                    prevTime = now;
-                    initGravity();
-                }
-            };
-
-            
-
-            if (nextBlock[0] == null) {
-                generateNext();
-            }
-
-            if (panelContainer == null) {
-                generateGrid(); 
-                generatePanel();
-            }
-
             // animate the grid, its a child to the LAYOUT not panelContainer
             for ( int r = 0; r < ROW; r++){
                 for( int c = 0; c < COL; c++){
@@ -489,7 +490,7 @@ public class Tetris implements MainInterface, TetrisInterface {
         panelContainer.setMinWidth(DOCUMENT_WIDTH);
         panelContainer.setVgap(0); 
         panelContainer.setHgap(330);  
-
+        panelContainer.setTranslateY(600);
         panelContainer.add(scoreContainer, 0, 0);
         panelContainer.add(blockContainer, 1, 0);
 
@@ -609,6 +610,7 @@ public class Tetris implements MainInterface, TetrisInterface {
                 square.setY((r * AREA)  + GRID_YOFFSET);
                 square.setWidth(AREA);
                 square.setHeight(AREA);
+                square.setTranslateY(-600);
                 square.setStroke(GRID_STROKE_COLOR);
                 square.setStrokeWidth(GRID_STROKE_WIDTH);
 

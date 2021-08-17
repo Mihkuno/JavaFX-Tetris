@@ -113,14 +113,15 @@ public class Menu implements MainInterface {
 
     private void pressed(String button) {
         if (button == "start") {
-
+            
             Audio.setMusicFadeOut(2);
 
-            new Animate().end_fade(INTRO); 
-            new Animate().end_fade(bg_menu);
             new Animate().end_swipe(INTRO_MISC, true);
             new Animate().end_swipe(INTRO, false)
                 .setOnFinished((e) -> { Tetris.start(); });
+
+            new Animate().end_fade(INTRO); 
+            new Animate().end_fade(bg_menu);
         }
         else if (button == "settings") {
             new Animate().mid_fade(bg_menu).setOnFinished((e) -> {
