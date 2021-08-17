@@ -11,11 +11,11 @@ import proj.tetris.TetrisInterface;
 
 public abstract class Block implements MainInterface, TetrisInterface {
    
-    private float focusStartColumn = 3 * AREA;
+    public float focusStartColumn = 3 * AREA;
     private float focusStartRow = -1 * AREA;
     private int rotateLoopCounter = 0;
     private int phaseCounter = 0;
-    private float column, row;
+    public float column, row;
     private int counterX = 0;
     private int counterY = 0;  
     private boolean isRotateCollided;
@@ -448,5 +448,21 @@ public abstract class Block implements MainInterface, TetrisInterface {
     }
     public int[][] getPickedVariant() {
         return pickedVariant;
+    }
+
+    public int getCounterX() {
+        return counterX;
+    }
+
+    public int getCounterY() {
+        return counterY;
+    }
+
+    public void setCounterX(int val) {
+        this.counterX = val;
+    }
+
+    public void setCounterY(int val) {
+        this.counterY = val;
     }
 }

@@ -1,6 +1,7 @@
 package proj.tetris;
 
 import javafx.animation.AnimationTimer;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -9,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -27,7 +29,7 @@ import java.util.Random;
 import java.util.Set;
 
 
-public class Tetris implements MainInterface, TetrisInterface{
+public class Tetris implements MainInterface, TetrisInterface {
 
     static Rectangle nextPanel, holdPanel, scorePanel;
     static GridPane panelContainer, blockContainer, scoreContainer, titleContainer, nextContainer, holdContainer;
@@ -115,173 +117,163 @@ public class Tetris implements MainInterface, TetrisInterface{
                 // fix: put a throws on the initGravity function
                 generateFocus(); generateGhost(); gameLoop.start();  btn_prev.setDisable(false);
                 LAYOUT.getChildren().remove(view_bg_anim);
+
+                DOCUMENT.setOnKeyPressed((key) -> {
+                    if (key.getText().equals("w")) { 
+                        focus.rotate(true); 
+                        if (showGhost) {
+                            if (!focus.isRotateCollided()) {
+                                ghost.rotate(false);
+                            }
+
+                            if (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
+                                ghost.redrawActive(focus.getCounterX(), focus.getCounterY());
+                            }
+                    
+                            while ( !(ghost.isBottomPoked()) ) {
+                                ghost.moveDown();
+                            }
+                        }   
+                        new Audio().playSound("../sound/fx_rotate.mp3");
+                        focus.redrawActive();
+                    }
+                    if (key.getText().equals("d")) { 
+                        if (!focus.isRightPoked()) {
+                            focus.moveRight();          
+                            if (showGhost){
+                                ghost.moveRight();
+                            } 
+                        }
+                        if (showGhost) {
+                            if (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
+                                ghost.redrawActive(focus.getCounterX(), focus.getCounterY());
+                            }
+                            while ( !(ghost.isBottomPoked()) ) {
+                                ghost.moveDown();
+                            }
+                            focus.redrawActive();
+                        }   
+                        new Audio().playSound("../sound/fx_move.mp3");
+                    }
+                    if (key.getText().equals("a")) { 
+                        if (!focus.isLeftPoked()) {
+                            focus.moveLeft();        
+                            if (showGhost) {
+                                ghost.moveLeft();
+                            }  
+                        }
+                        if (showGhost) {
+                            if (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
+                                ghost.redrawActive(focus.getCounterX(), focus.getCounterY());
+                            }
+                            while ( !(ghost.isBottomPoked()) ) {
+                                ghost.moveDown();
+                            }
+                            focus.redrawActive();
+                        }   
+                        new Audio().playSound("../sound/fx_move.mp3");
+                    }
+                    if (key.getText().equals("s")) { 
+                        if (!focus.isBottomPoked()) {
+                            focus.moveDown();                                        
+                            SCORE += 0.01;
+                            delayGravity = true;
+                            val_score.setText(Double.toString(Math.floor(SCORE * 100) / 100));
+                            new Audio().playSound("../sound/fx_move.mp3");
+                        }
+                    }
+                    if (key.getCode() == KeyCode.SPACE) {            
+                        while ( !(focus.isBottomPoked()) ) {
+                            focus.moveDown();
+                            SCORE += 0.01;
+                        }
+                        initGravity();
+                    }
+                    if (key.getCode() == KeyCode.SHIFT) {
+            
+                        // adds right and bottom margin in order to center O Block on the next panel
+                        PAREA = 18; int x = nextIndex[0] == 3 ? -PAREA/2 : 0; int y = nextIndex[0] == 3 ? -PAREA : 0; 
+            
+                        if (holdContainer.getChildren().isEmpty()) {
+            
+                            HOLD = nextBlock[0];
+                
+                            focus.undraw();
+                
+                            // pull the next indexes
+                            generateNext();
+                
+                            // redraw the generated next nodes
+                            updateNext();
+                
+                            generateFocus();
+                        }
+                
+                        else if (hasSwitched == true) {
+                            new Audio().playSound("../sound/fx_lock.mp3");
+                        }   
+                
+                        else if (!holdContainer.getChildren().isEmpty()) {
+                
+                            // map class names to their index
+                            HashMap<String,Integer> blockIndex = new HashMap<String,Integer>();
+                            blockIndex.put("I_Block",0);
+                            blockIndex.put("J_Block",1);
+                            blockIndex.put("L_Block",2);
+                            blockIndex.put("O_Block",3);
+                            blockIndex.put("S_Block",4);
+                            blockIndex.put("T_Block",5);
+                            blockIndex.put("Z_Block",6);
+                
+                            // clear the old hold
+                            holdContainer.setGridLinesVisible(false);
+                            holdContainer.getChildren().clear();
+                
+                            // new hold << focus
+                            String newHold = focus.getClass().getSimpleName();
+                
+                            // undraw active
+                            focus.undraw();
+                
+                            // generate focus previous hold
+                            String oldHold = HOLD.getClass().getSimpleName();
+                
+                            generateFocus(blockIndex.get(oldHold));
+                
+                            // switch the previous hold to new hold
+                            HOLD = Block.select(blockIndex.get(newHold), true);
+                
+                        }       
+                
+                        if (hasSwitched == false) {
+                
+                            hasSwitched = true;
+        
+                            new Audio().playSound("../sound/m_close.mp3");
+                
+                            next[0] = new Pane();
+                            next[0].setMinWidth(PAREA * 3);
+                            next[0].getChildren().addAll(HOLD.drawOpen(x, y, PAREA));
+                
+                            holdContainer.setGridLinesVisible(false);
+                            holdContainer.add(next[0], 0, 0);
+                            holdContainer.setAlignment(Pos.CENTER);
+        
+                            if (proj.frags.Settings.SHOWGRID) {
+                                holdContainer.setGridLinesVisible(true);
+                            }
+        
+                            ghost.undraw();
+                            generateGhost();
+                
+                        }
+                    }
+                });
             });
 
             view_bg_anim.toFront();
-           
-            DOCUMENT.setOnKeyPressed((key) -> {
-                if (key.getText().equals("w")) { 
-
-                    new Audio().playSound("../sound/fx_rotate.mp3");
-
-                    focus.rotate(true); 
-                    if (showGhost && !focus.isRotateCollided()) {
-                        ghost.rotate(false);
-                    }
-                    if (showGhost) {
-                        while (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
-                            ghost.moveUp();
-                        }
-                
-                        while ( !(ghost.isBottomPoked()) ) {
-                            ghost.moveDown();
-                        }
-                        focus.redrawActive();
-                    }   
-                }
-                if (key.getText().equals("d")) { 
-                    if (!focus.isRightPoked()) {
-                        focus.moveRight();  
-
-                        new Audio().playSound("../sound/fx_move.mp3");
-
-                        if (showGhost){
-                            ghost.moveRight();
-                        } 
-                    }
-                    if (showGhost) {
-                        while (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
-                            ghost.moveUp();
-                        }
-                
-                        while ( !(ghost.isBottomPoked()) ) {
-                            ghost.moveDown();
-                        }
-                        focus.redrawActive();
-                    }   
-                }
-                if (key.getText().equals("a")) { 
-                    if (!focus.isLeftPoked()) {
-                        focus.moveLeft();
-
-                        new Audio().playSound("../sound/fx_move.mp3");
-
-                        if (showGhost) {
-                            ghost.moveLeft();
-                        }  
-                    }
-                    if (showGhost) {
-                        while (!ghost.isTopPoking(focus) || ghost.isNextBlockPoked()) {
-                            ghost.moveUp();
-                        }
-                
-                        while ( !(ghost.isBottomPoked()) ) {
-                            ghost.moveDown();
-                        }
-                        focus.redrawActive();
-                    }   
-                }
-                if (key.getText().equals("s")) { 
-                    if (!focus.isBottomPoked()) {
-                        focus.moveDown();
-
-                        new Audio().playSound("../sound/fx_move.mp3");
-                                    
-                        SCORE += 0.01;
-                        delayGravity = true;
-                        val_score.setText(Double.toString(Math.floor(SCORE * 100) / 100));
-                    }
-                }
-                if (key.getCode() == KeyCode.SPACE) {            
-                    while ( !(focus.isBottomPoked()) ) {
-                        focus.moveDown();
-                        SCORE += 0.01;
-                    }
-                    initGravity();
-                }
-                if (key.getCode() == KeyCode.SHIFT) {
-        
-                    // adds right and bottom margin in order to center O Block on the next panel
-                    PAREA = 18; int x = nextIndex[0] == 3 ? -PAREA/2 : 0; int y = nextIndex[0] == 3 ? -PAREA : 0; 
-        
-                    if (holdContainer.getChildren().isEmpty()) {
-        
-                        HOLD = nextBlock[0];
-            
-                        focus.undraw();
-            
-                        // pull the next indexes
-                        generateNext();
-            
-                        // redraw the generated next nodes
-                        updateNext();
-            
-                        generateFocus();
-                    }
-            
-                    else if (hasSwitched == true) {
-                        new Audio().playSound("../sound/fx_lock.mp3");
-                    }   
-            
-                    else if (!holdContainer.getChildren().isEmpty()) {
-            
-                        // map class names to their index
-                        HashMap<String,Integer> blockIndex = new HashMap<String,Integer>();
-                        blockIndex.put("I_Block",0);
-                        blockIndex.put("J_Block",1);
-                        blockIndex.put("L_Block",2);
-                        blockIndex.put("O_Block",3);
-                        blockIndex.put("S_Block",4);
-                        blockIndex.put("T_Block",5);
-                        blockIndex.put("Z_Block",6);
-            
-                        // clear the old hold
-                        holdContainer.setGridLinesVisible(false);
-                        holdContainer.getChildren().clear();
-            
-                        // new hold << focus
-                        String newHold = focus.getClass().getSimpleName();
-            
-                        // undraw active
-                        focus.undraw();
-            
-                        // generate focus previous hold
-                        String oldHold = HOLD.getClass().getSimpleName();
-            
-                        generateFocus(blockIndex.get(oldHold));
-            
-                        // switch the previous hold to new hold
-                        HOLD = Block.select(blockIndex.get(newHold), true);
-            
-                    }       
-            
-                    if (hasSwitched == false) {
-            
-                        hasSwitched = true;
-
-                        new Audio().playSound("../sound/m_close.mp3");
-            
-                        next[0] = new Pane();
-                        next[0].setMinWidth(PAREA * 3);
-                        next[0].getChildren().addAll(HOLD.drawOpen(x, y, PAREA));
-            
-                        holdContainer.setGridLinesVisible(false);
-                        holdContainer.add(next[0], 0, 0);
-                        holdContainer.setAlignment(Pos.CENTER);
-
-                        if (proj.frags.Settings.SHOWGRID) {
-                            holdContainer.setGridLinesVisible(true);
-                        }
-
-                        ghost.undraw();
-                        generateGhost();
-            
-                    }
-                }
-            });
         }
     }
-
 
     private static void updateScore() {
         val_gain.setText(Integer.toString(GAINLN) +" / " + Integer.toString(GAINUP));
@@ -618,8 +610,6 @@ public class Tetris implements MainInterface, TetrisInterface{
         System.out.println("---------------------------------------------------");
         if (focus.isBottomPoked()) { 
 
-            new Audio().playSound("../sound/fx_lnd01.mp3");
-
             COUNT++; SCORE += 0.5; hasSwitched = false;
 
             ghost.undraw(); focus.collect();
@@ -631,6 +621,8 @@ public class Tetris implements MainInterface, TetrisInterface{
 
             updateScore();
             updateNext();
+
+            new Audio().playSound("../sound/fx_lnd01.mp3");
         } 
         else {
             focus.moveDown();
@@ -826,8 +818,5 @@ public class Tetris implements MainInterface, TetrisInterface{
         //     System.out.println(item);
         // }
         
-    }
-
-
-    
+    }    
 }
