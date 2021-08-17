@@ -1,7 +1,6 @@
 package proj.tetris;
 
 import javafx.animation.AnimationTimer;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -10,7 +9,6 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -103,19 +101,39 @@ public class Tetris implements MainInterface, TetrisInterface {
                 }
             };
 
-            generateGrid(); generateNext(); generatePanel();
+            
+
+            if (nextBlock[0] == null) {
+                generateNext();
+            }
+
+            if (panelContainer == null) {
+                generateGrid(); 
+                generatePanel();
+            }
 
             // animate the grid, its a child to the LAYOUT not panelContainer
             for ( int r = 0; r < ROW; r++){
                 for( int c = 0; c < COL; c++){
-                    new Animate().start_swipe(MESH[r][c], false, 500);
+                    new Animate().start_swipe(MESH[r][c], -600, 500);
                 }
-            }
+            }            
 
-            new Animate().start_swipe(panelContainer, true, 500).setOnFinished((e) -> {
+            new Animate().start_swipe(panelContainer, 600, 500).setOnFinished((e) -> {
                 // produces a NullPointerException because its called on a thread while initGravity is called upon
                 // fix: put a throws on the initGravity function
-                generateFocus(); generateGhost(); gameLoop.start();  btn_prev.setDisable(false);
+
+                try {
+                    focus.drawActive();
+                    ghost.drawActive();
+                } catch (NullPointerException a) {
+                    generateFocus(); generateGhost(); 
+                    System.out.println("An old focus instance was not found.. generating a new one"); a.printStackTrace();
+                }
+                
+                gameLoop.start();  btn_prev.setDisable(false);
+
+                for (Rectangle square : blockCollection ) {square.setVisible(true); square.toFront(); }
                 LAYOUT.getChildren().remove(view_bg_anim);
 
                 DOCUMENT.setOnKeyPressed((key) -> {
@@ -190,83 +208,7 @@ public class Tetris implements MainInterface, TetrisInterface {
                         initGravity();
                     }
                     if (key.getCode() == KeyCode.SHIFT) {
-            
-                        // adds right and bottom margin in order to center O Block on the next panel
-                        PAREA = 18; int x = nextIndex[0] == 3 ? -PAREA/2 : 0; int y = nextIndex[0] == 3 ? -PAREA : 0; 
-            
-                        if (holdContainer.getChildren().isEmpty()) {
-            
-                            HOLD = nextBlock[0];
-                
-                            focus.undraw();
-                
-                            // pull the next indexes
-                            generateNext();
-                
-                            // redraw the generated next nodes
-                            updateNext();
-                
-                            generateFocus();
-                        }
-                
-                        else if (hasSwitched == true) {
-                            new Audio().playSound("../sound/fx_lock.mp3");
-                        }   
-                
-                        else if (!holdContainer.getChildren().isEmpty()) {
-                
-                            // map class names to their index
-                            HashMap<String,Integer> blockIndex = new HashMap<String,Integer>();
-                            blockIndex.put("I_Block",0);
-                            blockIndex.put("J_Block",1);
-                            blockIndex.put("L_Block",2);
-                            blockIndex.put("O_Block",3);
-                            blockIndex.put("S_Block",4);
-                            blockIndex.put("T_Block",5);
-                            blockIndex.put("Z_Block",6);
-                
-                            // clear the old hold
-                            holdContainer.setGridLinesVisible(false);
-                            holdContainer.getChildren().clear();
-                
-                            // new hold << focus
-                            String newHold = focus.getClass().getSimpleName();
-                
-                            // undraw active
-                            focus.undraw();
-                
-                            // generate focus previous hold
-                            String oldHold = HOLD.getClass().getSimpleName();
-                
-                            generateFocus(blockIndex.get(oldHold));
-                
-                            // switch the previous hold to new hold
-                            HOLD = Block.select(blockIndex.get(newHold), true);
-                
-                        }       
-                
-                        if (hasSwitched == false) {
-                
-                            hasSwitched = true;
-        
-                            new Audio().playSound("../sound/m_close.mp3");
-                
-                            next[0] = new Pane();
-                            next[0].setMinWidth(PAREA * 3);
-                            next[0].getChildren().addAll(HOLD.drawOpen(x, y, PAREA));
-                
-                            holdContainer.setGridLinesVisible(false);
-                            holdContainer.add(next[0], 0, 0);
-                            holdContainer.setAlignment(Pos.CENTER);
-        
-                            if (proj.frags.Settings.SHOWGRID) {
-                                holdContainer.setGridLinesVisible(true);
-                            }
-        
-                            ghost.undraw();
-                            generateGhost();
-                
-                        }
+                        updateHold();
                     }
                 });
             });
@@ -290,9 +232,7 @@ public class Tetris implements MainInterface, TetrisInterface {
 
         gameLoop.stop(); focus.undraw(); ghost.undraw(); DOCUMENT.setOnKeyPressed(null); 
         
-        for (Rectangle square : blockCollection ) {LAYOUT.getChildren().remove(square);}
-
-        blockCollection.clear(); focus = null; ghost = null;
+        for (Rectangle square : blockCollection ) {square.setVisible(false);}
     }
 
     private static void updateNext() {
@@ -321,6 +261,85 @@ public class Tetris implements MainInterface, TetrisInterface {
                 nextContainer.setGridLinesVisible(true);
             }
         }
+    }
+    
+    public static void updateHold() {
+         // adds right and bottom margin in order to center O Block on the next panel
+         PAREA = 18; int x = nextIndex[0] == 3 ? -PAREA/2 : 0; int y = nextIndex[0] == 3 ? -PAREA : 0; 
+            
+         if (holdContainer.getChildren().isEmpty()) {
+
+             HOLD = nextBlock[0];
+ 
+             focus.undraw();
+ 
+             // pull the next indexes
+             generateNext();
+ 
+             // redraw the generated next nodes
+             updateNext();
+ 
+             generateFocus();
+         }
+ 
+         else if (hasSwitched == true) {
+             new Audio().playSound("../sound/fx_lock.mp3");
+         }   
+ 
+         else if (!holdContainer.getChildren().isEmpty()) {
+ 
+             // map class names to their index
+             HashMap<String,Integer> blockIndex = new HashMap<String,Integer>();
+             blockIndex.put("I_Block",0);
+             blockIndex.put("J_Block",1);
+             blockIndex.put("L_Block",2);
+             blockIndex.put("O_Block",3);
+             blockIndex.put("S_Block",4);
+             blockIndex.put("T_Block",5);
+             blockIndex.put("Z_Block",6);
+ 
+             // clear the old hold
+             holdContainer.setGridLinesVisible(false);
+             holdContainer.getChildren().clear();
+ 
+             // new hold << focus
+             String newHold = focus.getClass().getSimpleName();
+ 
+             // undraw active
+             focus.undraw();
+ 
+             // generate focus previous hold
+             String oldHold = HOLD.getClass().getSimpleName();
+ 
+             generateFocus(blockIndex.get(oldHold));
+ 
+             // switch the previous hold to new hold
+             HOLD = Block.select(blockIndex.get(newHold), true);
+ 
+         }       
+ 
+         if (hasSwitched == false) {
+ 
+             hasSwitched = true;
+
+             new Audio().playSound("../sound/m_close.mp3");
+ 
+             next[0] = new Pane();
+             next[0].setMinWidth(PAREA * 3);
+             next[0].getChildren().addAll(HOLD.drawOpen(x, y, PAREA));
+ 
+             holdContainer.setGridLinesVisible(false);
+             holdContainer.add(next[0], 0, 0);
+             holdContainer.setAlignment(Pos.CENTER);
+
+             if (proj.frags.Settings.SHOWGRID) {
+                 holdContainer.setGridLinesVisible(true);
+             }
+
+             ghost.undraw();
+             generateGhost();
+ 
+         }
     }
     
     
@@ -461,11 +480,10 @@ public class Tetris implements MainInterface, TetrisInterface {
         nextContainer.setVgap(20);
         nextContainer.setMaxHeight(nextPanel.getHeight());
         nextContainer.setAlignment(Pos.CENTER);
-        
+
         /* block generator here for nextContainer */
         updateNext();
-
-        panelContainer.setTranslateY(500);
+        
         panelContainer.setAlignment(Pos.CENTER);
         panelContainer.setMinHeight(DOCUMENT_HEIGHT);
         panelContainer.setMinWidth(DOCUMENT_WIDTH);
@@ -507,15 +525,11 @@ public class Tetris implements MainInterface, TetrisInterface {
             for ( int r = 0; r < ROW; r++){
                 for( int c = 0; c < COL; c++){
                     Rectangle square = MESH[r][c];
-                    new Animate().end_swipe(square, false).setOnFinished((e) -> {
-                        LAYOUT.getChildren().remove(square);
-                    });
+                    new Animate().end_swipe(square, -600);
                 }
             } 
 
-            new Animate().end_swipe(panelContainer, true).setOnFinished((e) -> {
-                LAYOUT.getChildren().remove(panelContainer);                
-            });
+            new Animate().end_swipe(panelContainer, 600);
             
             new Animate().start_fade(Menu.bg_menu).setOnFinished((e) -> {
                 new Animate().start_fade(INTRO); 
@@ -531,7 +545,7 @@ public class Tetris implements MainInterface, TetrisInterface {
         }
     }
     
-    public static void generateNext() {
+    public static Block[] generateNext() {
         Random random = new Random();        
 
         // generates four integer variants on start game
@@ -554,6 +568,8 @@ public class Tetris implements MainInterface, TetrisInterface {
         for (int i = 0; i < nextIndex.length; i++) {
             nextBlock[i] = Block.select(nextIndex[i], true);
         }
+
+        return nextBlock;
     }
 
 
@@ -595,8 +611,6 @@ public class Tetris implements MainInterface, TetrisInterface {
                 square.setHeight(AREA);
                 square.setStroke(GRID_STROKE_COLOR);
                 square.setStrokeWidth(GRID_STROKE_WIDTH);
-
-                square.setTranslateY(-500);
 
                 MESH[r][c] = square;
                 LAYOUT.getChildren().add(MESH[r][c]);
