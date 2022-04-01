@@ -1,6 +1,5 @@
 ## About
-This is my first ambitious game project that took a lot of time to finish
-> This repository is made for practice
+My first game project that took a lot of time to finish
 
 
 ## Features
