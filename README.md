@@ -1,9 +1,16 @@
 ## About
 This is my first ambitious game project that took a lot of time to finish
-> This repository is made for practice, and must not be used for any commercial purposes... why? cuz the fonts and audio aren't mine :<
+> This repository is made for practice
+
 
 ## Features
 The game is filled with simple transitions and a minimalist design.
+
+
+https://user-images.githubusercontent.com/26486389/161334362-afc88ba8-4a72-45d6-a7aa-ef3abb3cf70f.MP4
+
+https://user-images.githubusercontent.com/26486389/161334370-a7e7c0c1-acea-4e7e-b33c-9a0c5df695ae.MP4
+
 
 ## Controls
 - w : rotate peice
